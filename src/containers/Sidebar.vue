@@ -12,93 +12,14 @@
         :settings="{ suppressScrollX: true, wheelPropagation: false }"
       >
         <ul class="list-unstyled">
-          <li :class="{ active : selectedParentMenu==='wt'}">
-             <router-link :class="{ active : selectedParentMenu==='wt' }" @click.native="changeSelectedParentHasNoSubmenu('wt')" to="/app/wt" tag="li">
-                <a><i class="iconsminds-three-arrow-fork"></i>  {{ $t("menu.wt") }}</a>
-              </router-link>
+          <li :class="{ active : selectedParentMenu==='gestion-billet'}">
+            <router-link
+              :class="{ active : selectedParentMenu==='gestion-billet' }"
+              @click.native="changeSelectedParentHasNoSubmenu('gestion-billet')"
+              to="/app/gestion-billet" tag="li">
+              <a><i class="iconsminds-three-arrow-fork"></i>  {{ $t("menu.gestion-billet") }}</a>
+            </router-link>
           </li>
-          <li :class="{ active : selectedParentMenu==='piaf' }">
-            <a @click.prevent="openSubMenu($event,'piaf')" href="#piaf">
-              <i class="iconsminds-shop"></i>
-              {{ $t("menu.piaf") }}
-            </a>
-          </li>
-
-          <li :class="{ active : selectedParentMenu==='second-menu' }">
-            <a @click.prevent="openSubMenu($event,'second-menu')" href="#second-menu">
-              <i class="iconsminds-chemical"></i>
-              {{ $t("menu.second-menu") }}
-            </a>
-          </li>
-
-          <li :class="{ active : selectedParentMenu==='pages'}">
-            <a @click.prevent="openSubMenu($event,'pages')" href="#pages">
-              <i class="iconsminds-digital-drawing"></i>
-              {{ $t("menu.pages") }}
-            </a>
-          </li>
-          <li :class="{ active : selectedParentMenu==='single'}">
-             <router-link :class="{ active : selectedParentMenu==='single' }" @click.native="changeSelectedParentHasNoSubmenu('single')" to="/app/single" tag="li">
-                <a><i class="iconsminds-three-arrow-fork"></i>  {{ $t("menu.single") }}</a>
-              </router-link>
-          </li>
-        </ul>
-      </vue-perfect-scrollbar>
-    </div>
-
-    <div class="sub-menu">
-      <vue-perfect-scrollbar
-        class="scroll"
-        :settings="{ suppressScrollX: true, wheelPropagation: false }"
-      >
-        <ul
-          class="list-unstyled"
-          data-link="piaf"
-          :class="{'d-block':selectedParentMenu==='piaf' }"
-        >
-          <router-link tag="li" to="/app/piaf/start">
-            <a>
-              <i class="simple-icon-paper-plane"></i>
-              <span>{{ $t("menu.start") }}</span>
-            </a>
-          </router-link>
-        </ul>
-        <ul
-          class="list-unstyled"
-          data-link="second-menu"
-          :class="{'d-block':selectedParentMenu==='second-menu' }"
-        >
-          <router-link tag="li" to="/app/second-menu/second">
-            <a>
-              <i class="simple-icon-paper-plane"></i>
-              <span>{{ $t("menu.second") }}</span>
-            </a>
-          </router-link>
-        </ul>
-
-        <ul
-          class="list-unstyled"
-          data-link="pages"
-          :class="{'d-block':selectedParentMenu==='pages' }"
-        >
-          <router-link tag="li" to="/user/login">
-            <a target="_blank">
-              <i class="simple-icon-user-following"></i>
-              <span>{{ $t("menu.login") }}</span>
-            </a>
-          </router-link>
-          <router-link tag="li" to="/user/register">
-            <a target="_blank">
-              <i class="simple-icon-user-follow"></i>
-              <span>{{ $t("menu.register") }}</span>
-            </a>
-          </router-link>
-          <router-link tag="li" to="/user/forgot-password">
-            <a target="_blank">
-              <i class="simple-icon-user-unfollow"></i>
-              <span>{{ $t("menu.forgot-password") }}</span>
-            </a>
-          </router-link>
         </ul>
       </vue-perfect-scrollbar>
     </div>
