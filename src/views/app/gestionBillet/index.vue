@@ -15,7 +15,43 @@
             <div class="p-2"> <AddBillet/> </div>
           </div>
         </b-card-title>
-        <b-table hover striped :items="table" :fields="fields"></b-table>
+        <b-table hover :items="items" :fields="fields" :current-page="currentPage" :per-page="perPage">
+          <template slot="index" slot-scope="data">
+            {{data.index + 1}}
+          </template>
+          <template slot="aller" slot-scope="data">
+            <div class="text-capitalize"> {{data.value}} </div>
+          </template>
+          <template slot="actions" slot-scope="data">
+            {{data.value}}
+            <span class="h6 text-danger cursor"><i class="simple-icon-trash"></i> </span>
+            <span class="h6 text-primary cursor"><i class="simple-icon-note"></i> </span>
+          </template>
+        </b-table>
+
+        <b-pagination
+          size="sm"
+          align="center"
+          :total-rows="items.length"
+          :per-page="perPage"
+          v-model="currentPage"
+          >
+            <template v-slot:next-text>
+              <i class="simple-icon-arrow-right"/>
+            </template>
+            <template v-slot:prev-text>
+              <i class="simple-icon-arrow-left"/>
+            </template>
+            <template v-slot:first-text>
+              <i class="simple-icon-control-start"/>
+            </template>
+            <template v-slot:last-text>
+              <i class="simple-icon-control-end"/>
+            </template>
+        </b-pagination>
+
+        <DeleteBillet :id="billetSelect.id"/>
+
       </b-card>
     </b-colxx>
   </b-row>
@@ -25,12 +61,15 @@
 <script>
 import moment from 'moment'
 import AddBillet from '@/components/GestionBillet/AddBillet.vue'
+import DeleteBillet from '@/components/GestionBillet/DeleteBillet.vue'
+import { mapGetters } from 'vuex'
 
 moment.locale('fr')
 
 export default {
   components: {
-    AddBillet
+    AddBillet,
+    DeleteBillet
   },
   data () {
     return {
@@ -56,8 +95,23 @@ export default {
           sortable: true
         },
         {
-          key: 'destination',
-          label: 'Dest.',
+          key: 'aller',
+          label: 'Aller',
+          sortable: true
+        },
+        {
+          key: 'trajet',
+          label: 'Trajet',
+          sortable: true
+        },
+        {
+          key: 'dateDepart',
+          label: 'Date depart',
+          sortable: true
+        },
+        {
+          key: 'dateArrive',
+          label: 'Date arrive',
           sortable: true
         },
         {
@@ -66,7 +120,7 @@ export default {
           sortable: true
         },
         {
-          key: 'commi',
+          key: 'commission',
           label: 'Commi.',
           sortable: true
         },
@@ -74,26 +128,24 @@ export default {
           key: 'reste',
           label: 'Reste',
           sortable: true
-        }
+        },
+        'actions'
       ],
-      items: [
-        { date: moment().format('lll'), prenom: 'Lino', nom: 'Dickerson', destination: 'Cotonou - Doubai', tarif: 30000, commi: 30000, reste: 30000 },
-        { date: moment().format('lll'), prenom: 'Nabilath', nom: 'Larsen', destination: 'Milan - Hawai', tarif: 30000, commi: 30000, reste: 30000 },
-        { date: moment().format('lll'), prenom: 'Cranolle', nom: 'Geneva', destination: 'Cotonou - Chicago', tarif: 30000, commi: 30000, reste: 30000 },
-        { date: moment().format('lll'), prenom: 'Frederick', nom: 'Jami', destination: 'Lagos - New-York', tarif: 30000, commi: 30000, reste: 30000 }
-      ]
+      currentPage: 1,
+      perPage: 10,
+      billetSelect: {}
     }
   },
   computed: {
-    table () {
-      let index = 0
-      this.items.forEach(el => {
-        el.index = index + 1
-        index += 1
-      })
-      return this.items
-    }
+    ...mapGetters({
+      items: 'getTableBillet'
+    })
   },
-  methods: {}
+  methods: {
+    selectBillet (data) {
+      console.log(data)
+      this.billetSelect = data
+    },
+  }
 }
 </script>

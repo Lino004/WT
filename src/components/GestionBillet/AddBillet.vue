@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-button v-b-modal.modal-add-billet variant="outline-primary" class="mr-2 mb-2">Ajouter</b-button>
+    <a v-b-modal.modal-add-billet class="text-primary cursor"><i class="iconsminds-add h1"></i></a>
     <b-modal
       id="modal-add-billet"
       size="lg"
@@ -9,27 +9,30 @@
       ok-title="Enregistrer"
       cancel-title="Annuler"
       cancel-variant="danger"
-      @ok="save">
+      @ok="save"
+      no-close-on-backdrop>
       <b-form>
         <b-row>
 
           <b-colxx sm="6">
             <b-form-group label="Nom(s)">
               <vue-bootstrap-typeahead
-                v-model.lazy="nom"
+                v-model.trim="nom"
                 :data="listeClient"
                 :serializer="s => s.nom"
                 placeholder="Nom(s) du client"
+                ref="nomClientModalAdd"
               />
             </b-form-group>
           </b-colxx>
           <b-colxx sm="6">
             <b-form-group label="Prenom(s)">
               <vue-bootstrap-typeahead
-                v-model.lazy="prenom"
+                v-model.trim="prenom"
                 :data="listeClient"
                 :serializer="s => s.prenom"
                 placeholder="Prenom(s) du client"
+                ref="prenomClientModalAdd"
               />
             </b-form-group>
           </b-colxx>
@@ -187,6 +190,7 @@ import firebase from 'firebase/app'
 import 'firebase/database'
 import moment from 'moment'
 import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
+import { mapGetters } from 'vuex'
 
 const date = new Date()
 const y = date.getFullYear()
@@ -201,28 +205,6 @@ export default {
     VueBootstrapTypeahead
   },
   data: () => ({
-    listeClient: [
-      { id: 1, nom: 'AGOSSOU', prenom: 'JEAN' },
-      { id: 2, nom: 'Fruitcake', prenom: 'PERRETTE' },
-      { id: 3, nom: 'Chocolate Cake', prenom: 'PATRICIA' },
-      { id: 4, nom: 'Fat Rascal', prenom: 'NABILATH' },
-      { id: 5, nom: 'Financier', prenom: 'JENNIFER' },
-      { id: 6, nom: 'Genoise', prenom: 'BODELAIRE' },
-      { id: 7, nom: 'Gingerbread', prenom: 'CAROLLE' },
-      { id: 8, nom: 'Goose Breast', prenom: 'GILBER' },
-      { id: 9, nom: 'Parkin', prenom: 'TALAN' },
-      { id: 10, nom: 'Petit Gâteau', prenom: 'MOHAMED' },
-      { id: 11, nom: 'Salzburger Nockerl', prenom: 'CAROLINE' },
-      { id: 12, nom: 'Soufflé', prenom: 'AMINATH' },
-      { id: 13, nom: 'Streuselkuchen', prenom: 'HAYATH' },
-      { id: 14, nom: 'Tea Loaf', prenom: 'FAHOUCK' },
-      { id: 15, nom: 'Napoleonshat', prenom: 'MAKLOUD' },
-      { id: 16, nom: 'Merveilleux', prenom: 'KOWIOU' },
-      { id: 17, nom: 'Magdalena', prenom: 'THERRY' },
-      { id: 18, nom: 'Cremeschnitte', prenom: 'ANITA' },
-      { id: 19, nom: 'Cheesecake', prenom: 'JOEL' },
-      { id: 20, nom: 'Bebinca', prenom: 'BIG' }
-    ],
     nom: '',
     prenom: '',
     adresse: {
@@ -263,28 +245,6 @@ export default {
         { value: 'retour', text: 'Retour' }
       ]
     },
-    listeTrajets: [
-      'Marble Cake',
-      'Fruitcake',
-      'Chocolate Cake',
-      'Fat Rascal',
-      'Financier',
-      'Genoise',
-      'Gingerbread',
-      'Goose Breast',
-      'Parkin',
-      'Petit Gâteau',
-      'Salzburger Nockerl',
-      'Soufflé',
-      'Streuselkuchen',
-      'Tea Loaf',
-      'Napoleonshat',
-      'Merveilleux',
-      'Magdalena',
-      'Cremeschnitte',
-      'Cheesecake',
-      'Bebinca'
-    ],
     dateDepart: date,
     dateArrive: lastDay,
     tarif: {
@@ -298,6 +258,10 @@ export default {
     resteState: null
   }),
   computed: {
+    ...mapGetters({
+      listeClient: 'getTableClient',
+      listeTrajets: 'getTableTrajet'
+    }),
     reste () {
       return this.tarif.value - this.commission.value
     },
@@ -369,6 +333,9 @@ export default {
     reset () {
       this.nom = ''
       this.prenom = ''
+      this.adresse.value = ''
+      this.nationalite.value = ''
+      this.sexe.value = ''
       this.type.value = null
       this.aller.value = null
       this.trajet = ''
@@ -409,12 +376,14 @@ export default {
             aller: this.aller.value,
             trajet: this.trajet.toUpperCase(),
             dateDepart: moment(this.dateDepart).format('ll'),
-            dateArrive: this.aller.value === 'simple' ? false : moment(this.dateArrive).format('ll'),
+            dateArrive: this.aller.value === 'simple' ? '---' : moment(this.dateArrive).format('ll'),
             tarif: this.tarif.value,
             commission: this.commission.value,
             reste: this.reste,
             date: moment().format('lll')
           })
+          this.$refs.nomClientModalAdd.inputValue = ''
+          this.$refs.prenomClientModalAdd.inputValue = ''
           this.reset()
           this.$notify('success', '', 'Données enregistrées', { duration: 3000, permanent: false })
         } else {
