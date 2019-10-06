@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-button v-b-modal.modal-add-billet  variant="outline-primary" class="mr-2 mb-2">Ajouter</b-button>
+    <b-button v-b-modal.modal-add-billet variant="outline-primary" class="mr-2 mb-2">Ajouter</b-button>
     <b-modal
       id="modal-add-billet"
       size="lg"
@@ -16,22 +16,20 @@
           <b-colxx sm="6">
             <b-form-group label="Nom(s)">
               <vue-bootstrap-typeahead
-                v-model="nom"
+                v-model.lazy="nom"
                 :data="listeClient"
                 :serializer="s => s.nom"
                 placeholder="Nom(s) du client"
-                @hit="getIdClient"
               />
             </b-form-group>
           </b-colxx>
           <b-colxx sm="6">
             <b-form-group label="Prenom(s)">
               <vue-bootstrap-typeahead
-                v-model="prenom"
+                v-model.lazy="prenom"
                 :data="listeClient"
                 :serializer="s => s.prenom"
                 placeholder="Prenom(s) du client"
-                @hit="getIdClient"
               />
             </b-form-group>
           </b-colxx>
@@ -39,7 +37,7 @@
           <b-colxx sm="6" v-if="!idClient">
             <b-form-group label="Adresse">
               <b-form-input
-                v-model="adresse.value"
+                v-model.trim="adresse.value"
                 :state="adresse.state"
                 aria-describedby="msg-err-adresse"
                 placeholder="Adresse du client"
@@ -52,7 +50,7 @@
           <b-colxx sm="6" v-if="!idClient">
             <b-form-group label="Nationalite">
               <b-form-input
-                v-model="nationalite.value"
+                v-model.trim="nationalite.value"
                 :state="nationalite.state"
                 aria-describedby="msg-err-nationalite"
                 placeholder="Nationalite du client"
@@ -104,7 +102,7 @@
           <b-col :cols="aller.value === 'simple' ? 6 : 4">
             <b-form-group label="Trajet">
               <vue-bootstrap-typeahead
-                v-model="trajet"
+                v-model.trim="trajet"
                 :data="listeTrajets"
                 placeholder="Entrez le traje du vol..."
               />
@@ -304,11 +302,8 @@ export default {
       return this.tarif.value - this.commission.value
     },
     idClient () {
-      console.log('ok')
       if (this.nom && this.prenom) {
-        console.log(this.nom, this.prenom)
         const find = this.listeClient.find(el => el.nom === this.nom && el.prenom === this.prenom)
-        console.log(find)
         return find ? find.id : ''
       }
       return ''
@@ -380,29 +375,54 @@ export default {
       this.tarif.value = 100000
       this.commission.value = 0
     },
-    save (bvModalEvt) {
-      if (this.validNom() && this.validPrenom() && this.validType() &&
+    async save (bvModalEvt) {
+      try {
+        let id = this.idClient
+        if (!id) {
+          if (this.nom && this.prenom && this.validAdresse && this.validNationalite && this.sexe.value) {
+            id = firebase.database().ref().child('clients').push().key
+            await firebase.database().ref('clients/' + id).set({
+              id: id,
+              nom: this.nom.toUpperCase(),
+              prenom: this.prenom.toUpperCase(),
+              adresse: this.adresse.value,
+              nationalite: this.nationalite.value,
+              dateDeNaissance: moment(this.dateDeNaissance).format('ll'),
+              sexe: this.sexe.value,
+              date: moment().format('lll')
+            })
+          } else {
+            this.$notify('error', 'Erreur:', 'vérifier les champs puis réessayer', { duration: 3000, permanent: false })
+            bvModalEvt.preventDefault()
+          }
+        }
+        if (this.nom && this.prenom && this.validType() &&
           this.validAller() && this.trajet && this.validCommission() &&
           this.validReste() && this.validTarif()) {
-        const keyData = firebase.database().ref().child('billets').push().key
-        firebase.database().ref('billets/' + keyData).set({
-          id: keyData,
-          nom: this.nom.value,
-          prenom: this.prenom.value,
-          type: this.type.value,
-          aller: this.aller.value,
-          trajet: this.trajet.trim().toUpperCase(),
-          dateDepart: moment(this.dateDepart).format('ll'),
-          dateArrive: this.aller.value === 'simple' ? false : moment(this.dateArrive).format('ll'),
-          tarif: this.tarif.value,
-          commission: this.commission.value,
-          reste: this.reste,
-          date: moment().format('lll')
-        })
-        this.reset()
-        this.$notify('success', '', 'Données enregistrées', { duration: 3000, permanent: false })
-      } else {
-        this.$notify('error', 'Erreur:', 'vérifier les champs puis réessayer', { duration: 3000, permanent: false })
+          const keyData = firebase.database().ref().child('billets').push().key
+          await firebase.database().ref('billets/' + keyData).set({
+            id: keyData,
+            nom: this.nom.toUpperCase(),
+            prenom: this.prenom.toUpperCase(),
+            idClient: id,
+            type: this.type.value,
+            aller: this.aller.value,
+            trajet: this.trajet.toUpperCase(),
+            dateDepart: moment(this.dateDepart).format('ll'),
+            dateArrive: this.aller.value === 'simple' ? false : moment(this.dateArrive).format('ll'),
+            tarif: this.tarif.value,
+            commission: this.commission.value,
+            reste: this.reste,
+            date: moment().format('lll')
+          })
+          this.reset()
+          this.$notify('success', '', 'Données enregistrées', { duration: 3000, permanent: false })
+        } else {
+          this.$notify('error', 'Erreur:', 'vérifier les champs puis réessayer', { duration: 3000, permanent: false })
+          bvModalEvt.preventDefault()
+        }
+      } catch (error) {
+        this.$notify('error', 'Erreur:', error, { duration: 3000, permanent: false })
         bvModalEvt.preventDefault()
       }
     }
