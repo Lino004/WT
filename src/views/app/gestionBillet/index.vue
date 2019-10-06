@@ -12,7 +12,7 @@
         <b-card-title class="mb-1">
           <div class="d-flex">
             <div class="p-2 align-self-center flex-grow-1 h3">Liste</div>
-            <div class="p-2"> <add/> </div>
+            <div class="p-2"> <AddBillet/> </div>
           </div>
         </b-card-title>
         <b-table hover striped :items="table" :fields="fields"></b-table>
@@ -24,12 +24,14 @@
 
 <script>
 import moment from 'moment'
-import add from '@/components/GestionBillet/add.vue'
+import AddBillet from '@/components/GestionBillet/AddBillet.vue'
+
+moment.locale('fr')
 
 export default {
-  components: [
-    add
-  ],
+  components: {
+    AddBillet
+  },
   data () {
     return {
       fields: [
@@ -72,18 +74,13 @@ export default {
           key: 'reste',
           label: 'Reste',
           sortable: true
-        },
-        {
-          key: 'fs',
-          label: 'FS',
-          sortable: true
         }
       ],
       items: [
-        { date: moment().format('lll'), prenom: 'Lino', nom: 'Dickerson', destination: 'Cotonou - Doubai', tarif: 30000, commi: 30000, reste: 30000, fs: 30000 },
-        { date: moment().format('lll'), prenom: 'Nabilath', nom: 'Larsen', destination: 'Milan - Hawai', tarif: 30000, commi: 30000, reste: 30000, fs: 30000 },
-        { date: moment().format('lll'), prenom: 'Cranolle', nom: 'Geneva', destination: 'Cotonou - Chicago', tarif: 30000, commi: 30000, reste: 30000, fs: 30000 },
-        { date: moment().format('lll'), prenom: 'Frederick', nom: 'Jami', destination: 'Lagos - New-York', tarif: 30000, commi: 30000, reste: 30000, fs: 30000 }
+        { date: moment().format('lll'), prenom: 'Lino', nom: 'Dickerson', destination: 'Cotonou - Doubai', tarif: 30000, commi: 30000, reste: 30000 },
+        { date: moment().format('lll'), prenom: 'Nabilath', nom: 'Larsen', destination: 'Milan - Hawai', tarif: 30000, commi: 30000, reste: 30000 },
+        { date: moment().format('lll'), prenom: 'Cranolle', nom: 'Geneva', destination: 'Cotonou - Chicago', tarif: 30000, commi: 30000, reste: 30000 },
+        { date: moment().format('lll'), prenom: 'Frederick', nom: 'Jami', destination: 'Lagos - New-York', tarif: 30000, commi: 30000, reste: 30000 }
       ]
     }
   },

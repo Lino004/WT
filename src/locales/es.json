@@ -17,6 +17,7 @@
     "username": "Nombre de Usuario"
   },
   "menu": {
+    "gestion-billet": "Gestion billet",
     "app": "Inicio",
     "piaf": "Piaf",
     "dashboards": "Tableros",

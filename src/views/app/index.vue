@@ -1,5 +1,5 @@
 <template>
-  <div id="app-container" :class="getMenuType">
+  <div id="app-container" class="menu-sub-hidden" :class="getMenuType">
     <top-nav/>
     <sidebar/>
     <main>
