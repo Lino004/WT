@@ -19,13 +19,25 @@
           <template slot="index" slot-scope="data">
             {{data.index + 1}}
           </template>
-          <template slot="aller" slot-scope="data">
+          <template slot="type" slot-scope="data">
             <div class="text-capitalize"> {{data.value}} </div>
           </template>
+          <template slot="aller" slot-scope="data">
+            <div class="text-capitalize"> Aller {{data.value}} </div>
+          </template>
           <template slot="actions" slot-scope="data">
-            {{data.value}}
-            <span class="h6 text-danger cursor"><i class="simple-icon-trash"></i> </span>
-            <span class="h6 text-primary cursor"><i class="simple-icon-note"></i> </span>
+            <span
+              class="h6 text-danger cursor"
+              v-b-modal.modal-delete-billet
+              @click="selectBillet(data.item)">
+              <i class="simple-icon-trash"></i>
+            </span>
+            <span
+              class="h6 text-primary cursor"
+              v-b-modal.modal-modif-billet
+                @click="selectBillet(data.item)">
+                <i class="simple-icon-note"></i>
+              </span>
           </template>
         </b-table>
 
@@ -51,6 +63,7 @@
         </b-pagination>
 
         <DeleteBillet :id="billetSelect.id"/>
+        <ModifBillet :data="billetSelect"/>
 
       </b-card>
     </b-colxx>
@@ -62,6 +75,7 @@
 import moment from 'moment'
 import AddBillet from '@/components/GestionBillet/AddBillet.vue'
 import DeleteBillet from '@/components/GestionBillet/DeleteBillet.vue'
+import ModifBillet from '@/components/GestionBillet/ModifBillet.vue'
 import { mapGetters } from 'vuex'
 
 moment.locale('fr')
@@ -69,7 +83,8 @@ moment.locale('fr')
 export default {
   components: {
     AddBillet,
-    DeleteBillet
+    DeleteBillet,
+    ModifBillet
   },
   data () {
     return {
@@ -95,8 +110,13 @@ export default {
           sortable: true
         },
         {
+          key: 'type',
+          label: 'Passager',
+          sortable: true
+        },
+        {
           key: 'aller',
-          label: 'Aller',
+          label: 'Billet',
           sortable: true
         },
         {
@@ -143,9 +163,8 @@ export default {
   },
   methods: {
     selectBillet (data) {
-      console.log(data)
       this.billetSelect = data
-    },
+    }
   }
 }
 </script>

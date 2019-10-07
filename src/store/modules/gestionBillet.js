@@ -7,7 +7,14 @@ export default {
       return state.tableBillet
     },
     getTableTrajet: state => {
-      return state.tableBillet.map(el => el.trajet)
+      const table = []
+      state.tableBillet.forEach(el => {
+        const find = table.includes(el.trajet)
+        if (!find) {
+          table.push(el.trajet)
+        }
+      })
+      return table
     }
   },
   mutations: {
