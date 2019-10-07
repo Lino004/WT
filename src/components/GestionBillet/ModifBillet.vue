@@ -9,7 +9,8 @@
       cancel-title="Annuler"
       cancel-variant="danger"
       @ok="update"
-      no-close-on-backdrop>
+      no-close-on-backdrop
+      @shown="updateDataModal">
       <b-form>
         <b-row>
 
@@ -80,7 +81,8 @@
               <b-form-select
                 v-model="sexe.value"
                 :options="sexe.options"
-                :state="sexe.state"/>
+                :state="sexe.state"
+                plain/>
             </b-form-group>
           </b-colxx>
 
@@ -89,7 +91,8 @@
               <b-form-select
                 v-model="type.value"
                 :options="type.options"
-                :state="type.state"/>
+                :state="type.state"
+                plain/>
             </b-form-group>
           </b-colxx>
           <b-colxx sm="6">
@@ -101,7 +104,7 @@
             </b-form-group>
           </b-colxx>
 
-          <b-col :cols="aller.value === 'simple' ? 6 : 4">
+          <b-col :cols="aller.value === 'AS' ? 6 : 4">
             <b-form-group label="Trajet">
               <vue-bootstrap-typeahead
                 v-model.trim="trajet"
@@ -111,7 +114,7 @@
               />
             </b-form-group>
           </b-col>
-          <b-col :cols="aller.value === 'simple' ? 6 : 4">
+          <b-col :cols="aller.value === 'AS' ? 6 : 4">
             <b-form-group label="Date de depart">
               <v-date-picker
                 mode="single"
@@ -123,7 +126,7 @@
               />
             </b-form-group>
           </b-col>
-          <b-col cols="4" v-if="aller.value !== 'simple'">
+          <b-col cols="4" v-if="aller.value !== 'AS'">
             <b-form-group label="Date d'arrive">
               <v-date-picker
                 mode="single"
@@ -241,9 +244,9 @@ export default {
       value: null,
       state: null,
       options: [
-        { value: null, text: 'Simple ou retour' },
-        { value: 'simple', text: 'Simple' },
-        { value: 'retour', text: 'Retour' }
+        { value: null, text: 'Choississez un type' },
+        { value: 'AS', text: 'AS' },
+        { value: 'AR', text: 'AR' }
       ]
     },
     dateDepart: date,
@@ -259,21 +262,6 @@ export default {
     resteState: null,
     idBillet: null
   }),
-  watch: {
-    data (val) {
-      this.$refs.nomClientModalModif.inputValue = val.nom
-      this.$refs.prenomClientModalModif.inputValue = val.prenom
-      this.$refs.trajetClientModalModif.inputValue = val.trajet
-      this.nom = val.nom
-      this.prenom = val.prenom
-      this.type.value = val.type
-      this.aller.value = val.aller
-      this.trajet = val.trajet
-      this.tarif.value = val.tarif
-      this.commission.value = val.commission
-      this.idBillet = val.id
-    }
-  },
   computed: {
     ...mapGetters({
       listeClient: 'getTableClient',
@@ -391,7 +379,7 @@ export default {
             aller: this.aller.value,
             trajet: this.trajet.toUpperCase(),
             dateDepart: moment(this.dateDepart).format('ll'),
-            dateArrive: this.aller.value === 'simple' ? '---' : moment(this.dateArrive).format('ll'),
+            dateArrive: this.aller.value === 'AS' ? '---' : moment(this.dateArrive).format('ll'),
             tarif: this.tarif.value,
             commission: this.commission.value,
             reste: this.reste,
@@ -406,6 +394,19 @@ export default {
         this.$notify('error', 'Erreur:', error, { duration: 3000, permanent: false })
         bvModalEvt.preventDefault()
       }
+    },
+    updateDataModal () {
+      this.$refs.nomClientModalModif.inputValue = this.data.nom
+      this.$refs.prenomClientModalModif.inputValue = this.data.prenom
+      this.$refs.trajetClientModalModif.inputValue = this.data.trajet
+      this.nom = this.data.nom
+      this.prenom = this.data.prenom
+      this.type.value = this.data.type
+      this.aller.value = this.data.aller
+      this.trajet = this.data.trajet
+      this.tarif.value = this.data.tarif
+      this.commission.value = this.data.commission
+      this.idBillet = this.data.id
     }
   }
 }

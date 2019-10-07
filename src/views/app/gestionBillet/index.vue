@@ -11,21 +11,90 @@
       <b-card class="mb-4">
         <b-card-title class="mb-1">
           <div class="d-flex">
-            <div class="p-2 align-self-center flex-grow-1 h3">Liste</div>
+            <div class="p-2 align-self-center flex-grow-1">
+              <b-row>
+                <b-colxx>
+                  <b-form-group>
+                    <v-date-picker
+                      mode="range"
+                      v-model="periode"
+                      :input-props="{
+                        class:'form-control bg-white',
+                        readonly: true,
+                        placeholder: 'Recherche sur une periode'
+                      }"
+                    />
+                  </b-form-group>
+                </b-colxx>
+                <b-colxx>
+                  <b-form-group>
+                    <b-form-input
+                      v-model.trim="nom"
+                      placeholder="Recherche sur le nom"/>
+                  </b-form-group>
+                </b-colxx>
+                <b-colxx>
+                  <b-form-group>
+                    <b-form-input
+                      v-model.trim="prenom"
+                      placeholder="Recherche sur le prenom"/>
+                  </b-form-group>
+                </b-colxx>
+                <b-colxx>
+                  <b-form-group>
+                    <b-form-input
+                      v-model.trim="trajet"
+                      placeholder="Recherche sur le trajet"/>
+                  </b-form-group>
+                </b-colxx>
+                <b-colxx>
+                  <b-form-group>
+                    <v-date-picker
+                      mode="single"
+                      v-model="depart"
+                      :input-props="{
+                        class:'form-control bg-white',
+                        readonly: false,
+                        placeholder: 'Recherche sur une date de depart'
+                      }"
+                    />
+                  </b-form-group>
+                </b-colxx>
+                <b-colxx>
+                  <b-form-group>
+                    <v-date-picker
+                      mode="single"
+                      v-model="arrive"
+                      :input-props="{
+                        class:'form-control bg-white',
+                        readonly: false,
+                        placeholder: 'Recherche sur une date arrive'
+                      }"
+                    />
+                  </b-form-group>
+                </b-colxx>
+              </b-row>
+            </div>
             <div class="p-2"> <AddBillet/> </div>
           </div>
         </b-card-title>
-        <b-table hover :items="items" :fields="fields" :current-page="currentPage" :per-page="perPage">
-          <template slot="index" slot-scope="data">
-            {{data.index + 1}}
-          </template>
-          <template slot="type" slot-scope="data">
+
+        <div class="separator mb-5"></div>
+
+        <b-table hover :items="table" :fields="fields" :current-page="currentPage" :per-page="perPage">
+          <template v-slot:cell(type)="data">
             <div class="text-capitalize"> {{data.value}} </div>
           </template>
-          <template slot="aller" slot-scope="data">
-            <div class="text-capitalize"> Aller {{data.value}} </div>
+          <template v-slot:cell(tarif)="data">
+            <h6><b-badge variant="primary"> {{new Intl.NumberFormat().format(data.value)}} </b-badge></h6>
           </template>
-          <template slot="actions" slot-scope="data">
+          <template v-slot:cell(commission)="data">
+            <h6><b-badge variant="light"> {{new Intl.NumberFormat().format(data.value)}} </b-badge></h6>
+          </template>
+          <template v-slot:cell(reste)="data">
+            <h6><b-badge variant="success"> {{new Intl.NumberFormat().format(data.value)}} </b-badge></h6>
+          </template>
+          <template v-slot:cell(actions)="data">
             <span
               class="h6 text-danger cursor"
               v-b-modal.modal-delete-billet
@@ -35,16 +104,16 @@
             <span
               class="h6 text-primary cursor"
               v-b-modal.modal-modif-billet
-                @click="selectBillet(data.item)">
-                <i class="simple-icon-note"></i>
-              </span>
+              @click="selectBillet(data.item)">
+              <i class="simple-icon-note"></i>
+            </span>
           </template>
         </b-table>
 
         <b-pagination
           size="sm"
           align="center"
-          :total-rows="items.length"
+          :total-rows="table.length"
           :per-page="perPage"
           v-model="currentPage"
           >
@@ -62,6 +131,26 @@
             </template>
         </b-pagination>
 
+        <div class="separator mb-5"></div>
+
+        <b-row align-h="end">
+          <b-col cols="4" class="text-right">
+            <b-list-group>
+              <b-list-group-item class="d-flex justify-content-between align-items-center h5 font-weight-bold">
+                Total Tarif :
+                <b-badge variant="primary">{{new Intl.NumberFormat().format(sommeTarif)}} FCFA</b-badge>
+              </b-list-group-item>
+              <b-list-group-item class="d-flex justify-content-between align-items-center h5 font-weight-bold">
+                Total Commission :
+                <b-badge variant="light">{{new Intl.NumberFormat().format(sommeCommi)}} FCFA</b-badge>
+              </b-list-group-item>
+              <b-list-group-item class="d-flex justify-content-between align-items-center h5 font-weight-bold">
+                Total Reste :
+                <b-badge variant="success">{{new Intl.NumberFormat().format(sommeReste)}} FCFA</b-badge>
+              </b-list-group-item>
+            </b-list-group>
+          </b-col>
+        </b-row>
         <DeleteBillet :id="billetSelect.id"/>
         <ModifBillet :data="billetSelect"/>
 
@@ -152,14 +241,74 @@ export default {
         'actions'
       ],
       currentPage: 1,
-      perPage: 10,
-      billetSelect: {}
+      perPage: 5,
+      billetSelect: {},
+      periode: {
+        end: new Date(),
+        start: new Date()
+      },
+      nom: '',
+      prenom: '',
+      trajet: '',
+      depart: null,
+      arrive: null
     }
   },
   computed: {
     ...mapGetters({
       items: 'getTableBillet'
-    })
+    }),
+    tempDataPeriode () {
+      if (this.periode) {
+        return this.items.filter(el => moment(el.date, 'll').format('ll') >= moment(this.periode.start).format('ll') &&
+          moment(el.date, 'll').format('ll') <= moment(this.periode.end).format('ll'))
+      }
+      return this.items
+    },
+    sommeTarif () {
+      let somme = 0
+      this.tempDataPeriode.forEach(el => {
+        somme = somme + parseInt(el.tarif, 10)
+      })
+      return somme
+    },
+    sommeCommi () {
+      let somme = 0
+      this.tempDataPeriode.forEach(el => {
+        somme = somme + parseInt(el.commission, 10)
+      })
+      return somme
+    },
+    sommeReste () {
+      let somme = 0
+      this.tempDataPeriode.forEach(el => {
+        somme = somme + parseInt(el.reste, 10)
+      })
+      return somme
+    },
+    table () {
+      let data = this.items
+      if (this.periode) {
+        data = data.filter(el => moment(el.date, 'll').format('ll') >= moment(this.periode.start).format('ll') &&
+          moment(el.date, 'll').format('ll') <= moment(this.periode.end).format('ll'))
+      }
+      if (this.nom) {
+        data = data.filter(el => el.nom.toLowerCase().includes(this.nom.toLowerCase()))
+      }
+      if (this.prenom) {
+        data = data.filter(el => el.prenom.toLowerCase().includes(this.prenom.toLowerCase()))
+      }
+      if (this.trajet) {
+        data = data.filter(el => el.trajet.toLowerCase().includes(this.trajet.toLowerCase()))
+      }
+      if (this.depart) {
+        data = data.filter(el => moment(el.dateDepart, 'll').format('ll') === moment(this.depart).format('ll'))
+      }
+      if (this.arrive) {
+        data = data.filter(el => moment(el.dateArrive, 'll').format('ll') === moment(this.arrive).format('ll'))
+      }
+      return data
+    }
   },
   methods: {
     selectBillet (data) {

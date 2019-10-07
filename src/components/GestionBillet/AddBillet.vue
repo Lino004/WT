@@ -10,7 +10,8 @@
       cancel-title="Annuler"
       cancel-variant="danger"
       @ok="save"
-      no-close-on-backdrop>
+      no-close-on-backdrop
+      @hide="reset">
       <b-form>
         <b-row>
 
@@ -81,7 +82,8 @@
               <b-form-select
                 v-model="sexe.value"
                 :options="sexe.options"
-                :state="sexe.state"/>
+                :state="sexe.state"
+                plain/>
             </b-form-group>
           </b-colxx>
 
@@ -90,7 +92,8 @@
               <b-form-select
                 v-model="type.value"
                 :options="type.options"
-                :state="type.state"/>
+                :state="type.state"
+                plain/>
             </b-form-group>
           </b-colxx>
           <b-colxx sm="6">
@@ -98,11 +101,12 @@
               <b-form-select
                 v-model="aller.value"
                 :options="aller.options"
-                :state="aller.state"/>
+                :state="aller.state"
+                plain/>
             </b-form-group>
           </b-colxx>
 
-          <b-col :cols="aller.value === 'simple' ? 6 : 4">
+          <b-col :cols="aller.value === 'AS' ? 6 : 4">
             <b-form-group label="Trajet">
               <vue-bootstrap-typeahead
                 v-model.trim="trajet"
@@ -111,7 +115,7 @@
               />
             </b-form-group>
           </b-col>
-          <b-col :cols="aller.value === 'simple' ? 6 : 4">
+          <b-col :cols="aller.value === 'AS' ? 6 : 4">
             <b-form-group label="Date de depart">
               <v-date-picker
                 mode="single"
@@ -123,7 +127,7 @@
               />
             </b-form-group>
           </b-col>
-          <b-col cols="4" v-if="aller.value !== 'simple'">
+          <b-col cols="4" v-if="aller.value !== 'AS'">
             <b-form-group label="Date d'arrive">
               <v-date-picker
                 mode="single"
@@ -241,8 +245,8 @@ export default {
       state: null,
       options: [
         { value: null, text: 'Choississez un type' },
-        { value: 'simple', text: 'Aller Simple' },
-        { value: 'retour', text: 'Aller Retour' }
+        { value: 'AS', text: 'AS' },
+        { value: 'AR', text: 'AR' }
       ]
     },
     dateDepart: date,
@@ -331,6 +335,8 @@ export default {
       return false
     },
     reset () {
+      this.$refs.nomClientModalAdd.inputValue = ''
+      this.$refs.prenomClientModalAdd.inputValue = ''
       this.nom = ''
       this.prenom = ''
       this.adresse.value = ''
@@ -376,15 +382,12 @@ export default {
             aller: this.aller.value,
             trajet: this.trajet.toUpperCase(),
             dateDepart: moment(this.dateDepart).format('ll'),
-            dateArrive: this.aller.value === 'simple' ? '---' : moment(this.dateArrive).format('ll'),
+            dateArrive: this.aller.value === 'AS' ? '---' : moment(this.dateArrive).format('ll'),
             tarif: this.tarif.value,
             commission: this.commission.value,
             reste: this.reste,
             date: moment().format('lll')
           })
-          this.$refs.nomClientModalAdd.inputValue = ''
-          this.$refs.prenomClientModalAdd.inputValue = ''
-          this.reset()
           this.$notify('success', '', 'Données enregistrées', { duration: 3000, permanent: false })
         } else {
           this.$notify('error', 'Erreur:', 'vérifier les champs puis réessayer', { duration: 3000, permanent: false })

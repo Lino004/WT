@@ -4,7 +4,13 @@ export default {
   },
   getters: {
     getTableBillet: state => {
-      return state.tableBillet
+      const data = state.tableBillet
+      let i = 0
+      data.forEach(el => {
+        el.index = (i + 1)
+        i += 1
+      })
+      return data
     },
     getTableTrajet: state => {
       const table = []
