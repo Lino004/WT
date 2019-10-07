@@ -1,17 +1,16 @@
 <template>
   <div>
-    <a v-b-modal.modal-add-billet class="text-primary cursor"><i class="iconsminds-add h1"></i></a>
     <b-modal
-      id="modal-add-billet"
+      id="modal-modif-billet"
       size="lg"
       centered
-      title="Enregistrement d'un billet"
-      ok-title="Enregistrer"
+      title="Modification d'un billet"
+      ok-title="Modifier"
       cancel-title="Annuler"
       cancel-variant="danger"
-      @ok="save"
+      @ok="update"
       no-close-on-backdrop
-      @hide="reset">
+      @shown="updateDataModal">
       <b-form>
         <b-row>
 
@@ -22,7 +21,7 @@
                 :data="listeClient"
                 :serializer="s => s.nom"
                 placeholder="Nom(s) du client"
-                ref="nomClientModalAdd"
+                ref="nomClientModalModif"
               />
             </b-form-group>
           </b-colxx>
@@ -33,7 +32,7 @@
                 :data="listeClient"
                 :serializer="s => s.prenom"
                 placeholder="Prenom(s) du client"
-                ref="prenomClientModalAdd"
+                ref="prenomClientModalModif"
               />
             </b-form-group>
           </b-colxx>
@@ -88,7 +87,7 @@
           </b-colxx>
 
           <b-colxx sm="6">
-            <b-form-group label="Type de passager">
+            <b-form-group label="Type">
               <b-form-select
                 v-model="type.value"
                 :options="type.options"
@@ -97,12 +96,11 @@
             </b-form-group>
           </b-colxx>
           <b-colxx sm="6">
-            <b-form-group label="Type de billet">
+            <b-form-group label="Aller">
               <b-form-select
                 v-model="aller.value"
                 :options="aller.options"
-                :state="aller.state"
-                plain/>
+                :state="aller.state"/>
             </b-form-group>
           </b-colxx>
 
@@ -112,6 +110,7 @@
                 v-model.trim="trajet"
                 :data="listeTrajets"
                 placeholder="Entrez le traje du vol..."
+                ref="trajetClientModalModif"
               />
             </b-form-group>
           </b-col>
@@ -204,7 +203,8 @@ const lastDay = new Date(y, m + 1, 0)
 moment.locale('fr')
 
 export default {
-  name: 'AddBillet',
+  name: 'ModifBillet',
+  props: ['data'],
   components: {
     VueBootstrapTypeahead
   },
@@ -259,7 +259,8 @@ export default {
       value: 0,
       state: null
     },
-    resteState: null
+    resteState: null,
+    idBillet: null
   }),
   computed: {
     ...mapGetters({
@@ -335,8 +336,6 @@ export default {
       return false
     },
     reset () {
-      this.$refs.nomClientModalAdd.inputValue = ''
-      this.$refs.prenomClientModalAdd.inputValue = ''
       this.nom = ''
       this.prenom = ''
       this.adresse.value = ''
@@ -348,7 +347,7 @@ export default {
       this.tarif.value = 100000
       this.commission.value = 0
     },
-    async save (bvModalEvt) {
+    async update (bvModalEvt) {
       try {
         let id = this.idClient
         if (!id) {
@@ -372,9 +371,7 @@ export default {
         if (this.nom && this.prenom && this.validType() &&
           this.validAller() && this.trajet && this.validCommission() &&
           this.validReste() && this.validTarif()) {
-          const keyData = firebase.database().ref().child('billets').push().key
-          await firebase.database().ref('billets/' + keyData).set({
-            id: keyData,
+          await firebase.database().ref('billets/').child(this.idBillet).update({
             nom: this.nom.toUpperCase(),
             prenom: this.prenom.toUpperCase(),
             idClient: id,
@@ -397,6 +394,19 @@ export default {
         this.$notify('error', 'Erreur:', error, { duration: 3000, permanent: false })
         bvModalEvt.preventDefault()
       }
+    },
+    updateDataModal () {
+      this.$refs.nomClientModalModif.inputValue = this.data.nom
+      this.$refs.prenomClientModalModif.inputValue = this.data.prenom
+      this.$refs.trajetClientModalModif.inputValue = this.data.trajet
+      this.nom = this.data.nom
+      this.prenom = this.data.prenom
+      this.type.value = this.data.type
+      this.aller.value = this.data.aller
+      this.trajet = this.data.trajet
+      this.tarif.value = this.data.tarif
+      this.commission.value = this.data.commission
+      this.idBillet = this.data.id
     }
   }
 }

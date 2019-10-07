@@ -4,10 +4,23 @@ export default {
   },
   getters: {
     getTableBillet: state => {
-      return state.tableBillet
+      const data = state.tableBillet
+      let i = 0
+      data.forEach(el => {
+        el.index = (i + 1)
+        i += 1
+      })
+      return data
     },
     getTableTrajet: state => {
-      return state.tableBillet.map(el => el.trajet)
+      const table = []
+      state.tableBillet.forEach(el => {
+        const find = table.includes(el.trajet)
+        if (!find) {
+          table.push(el.trajet)
+        }
+      })
+      return table
     }
   },
   mutations: {
