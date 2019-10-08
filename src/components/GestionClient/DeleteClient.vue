@@ -1,13 +1,13 @@
 <template>
   <div>
     <b-modal
-      id="modal-delete-billet"
+      id="modal-delete-client"
       centered
-      title="Suppression d'un billet"
+      title="Suppression d'un client"
       ok-title="Supprimer"
       cancel-title="Annuler"
       cancel-variant="danger"
-      @ok="deleteBillet"
+      @ok="deleteClient"
       no-close-on-backdrop>
       <p>
         Etes vous sur de vouloir supprimer cette donnée?
@@ -22,14 +22,14 @@ import 'firebase/database'
 import { baseRef } from '@/constants/config'
 
 export default {
-  name: 'DeleteBillet',
+  name: 'DeleteClient',
   props: ['id'],
   data: () => ({}),
   computed: {},
   methods: {
-    async deleteBillet () {
+    async deleteClient () {
       try {
-        await firebase.database().ref(`${baseRef.billet}/${this.id}`).remove()
+        await firebase.database().ref(`${baseRef.client}/${this.id}`).remove()
         this.$notify('success', '', 'Donnée supprimée', { duration: 3000, permanent: false })
       } catch (error) {
         this.$notify('error', 'Erreur:', error, { duration: 3000, permanent: false })

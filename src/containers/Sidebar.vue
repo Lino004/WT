@@ -17,7 +17,15 @@
               :class="{ active : selectedParentMenu==='gestion-billet' }"
               @click.native="changeSelectedParentHasNoSubmenu('gestion-billet')"
               to="/app/gestion-billet" tag="li">
-              <a><i class="iconsminds-three-arrow-fork"></i>  {{ $t("menu.gestion-billet") }}</a>
+              <a><i class="simple-icon-plane"></i>  {{ $t("menu.gestion-billet") }}</a>
+            </router-link>
+          </li>
+          <li :class="{ active : selectedParentMenu==='gestion-client'}">
+            <router-link
+              :class="{ active : selectedParentMenu==='gestion-client' }"
+              @click.native="changeSelectedParentHasNoSubmenu('gestion-client')"
+              to="/app/gestion-client" tag="li">
+              <a><i class="simple-icon-people"></i>  {{ $t("menu.gestion-client") }}</a>
             </router-link>
           </li>
         </ul>

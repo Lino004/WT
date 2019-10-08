@@ -18,6 +18,7 @@
   },
   "menu": {
     "gestion-billet": "Gestion billet",
+    "gestion-client": "Gestion Clients",
     "app": "Inicio",
     "piaf": "Piaf",
     "dashboards": "Tableros",

@@ -2,7 +2,7 @@
 <div>
   <b-row>
     <b-colxx xxs="12">
-      <piaf-breadcrumb :heading="$t('menu.gestion-billet')"/>
+      <piaf-breadcrumb :heading="$t('menu.gestion-client')"/>
       <div class="separator mb-5"></div>
     </b-colxx>
   </b-row>
@@ -43,39 +43,34 @@
                 <b-colxx>
                   <b-form-group>
                     <b-form-input
-                      v-model.trim="trajet"
-                      placeholder="Recherche sur le trajet"/>
+                      v-model.trim="nationalite"
+                      placeholder="Nationalite"/>
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
                   <b-form-group>
                     <v-date-picker
                       mode="single"
-                      v-model="depart"
+                      v-model="dateDeNaissance"
                       :input-props="{
                         class:'form-control colorTheme',
                         readonly: false,
-                        placeholder: 'Recherche sur une date de depart'
+                        placeholder: 'Date de naissance'
                       }"
                     />
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
                   <b-form-group>
-                    <v-date-picker
-                      mode="single"
-                      v-model="arrive"
-                      :input-props="{
-                        class:'form-control colorTheme',
-                        readonly: false,
-                        placeholder: 'Recherche sur une date arrive'
-                      }"
-                    />
+                    <b-form-select
+                      v-model.lazy="sexe.value"
+                      :options="sexe.options"
+                      plain/>
                   </b-form-group>
                 </b-colxx>
               </b-row>
             </div>
-            <div class="p-2"> <AddBillet/> </div>
+            <div class="p-2"> <AddClient/> </div>
           </div>
         </b-card-title>
 
@@ -109,18 +104,18 @@
           <template v-slot:cell(actions)="data">
             <span
               class="h6 text-danger cursor"
-              @click="selectBillet(data.item, 'modal-delete-billet')"
+              @click="selectBillet(data.item, 'modal-delete-client')"
               v-if="currentUser.status === 'admin'">
               <i class="simple-icon-trash"></i>
             </span>
             <span
               class="h6 text-secondary cursor"
-              @click="selectBillet(data.item, 'modal-annule-billet')">
+              @click="selectBillet(data.item, 'modal-annule-client')">
               <i class="iconsminds-close"></i>
             </span>
             <span
               class="h6 text-primary cursor"
-              @click="selectBillet(data.item, 'modal-modif-billet')">
+              @click="selectBillet(data.item, 'modal-modif-client')">
               <i class="simple-icon-note"></i>
             </span>
           </template>
@@ -156,34 +151,9 @@
 
         <div class="separator mb-5" v-if="table.length"></div>
 
-        <b-row align-h="end" v-if="table.length">
-          <b-col cols="4" class="text-right">
-            <b-list-group>
-              <b-list-group-item class="colorTheme d-flex justify-content-between align-items-center h5 font-weight-bold">
-                Total Tarif :
-                <b-badge variant="primary">{{new Intl.NumberFormat().format(sommeTarif)}} FCFA</b-badge>
-              </b-list-group-item>
-              <b-list-group-item class="colorTheme d-flex justify-content-between align-items-center h5 font-weight-bold">
-                Total Commission :
-                <b-badge variant="light">{{new Intl.NumberFormat().format(sommeCommi)}} FCFA</b-badge>
-              </b-list-group-item>
-              <b-list-group-item class="colorTheme d-flex justify-content-between align-items-center h5 font-weight-bold">
-                Total Reste :
-                <b-badge variant="success">{{new Intl.NumberFormat().format(sommeReste)}} FCFA</b-badge>
-              </b-list-group-item>
-              <b-list-group-item
-                v-if="currentUser.status === 'admin'"
-                class="colorTheme d-flex justify-content-between align-items-center h5 font-weight-bold">
-                Total FS :
-                <b-badge variant="dark">{{new Intl.NumberFormat().format(sommeFs)}} FCFA</b-badge>
-              </b-list-group-item>
-            </b-list-group>
-          </b-col>
-        </b-row>
-
-        <DeleteBillet :id="billetSelect.id"/>
-        <AnnuleBillet :id="billetSelect.id"/>
-        <ModifBillet :data="billetSelect"/>
+        <DeleteClient :id="clientSelect.id"/>
+        <AnnuleClient :id="clientSelect.id"/>
+        <ModifClient :data="clientSelect"/>
 
       </b-card>
     </b-colxx>
@@ -193,26 +163,26 @@
 
 <script>
 import moment from 'moment'
-import AddBillet from '@/components/GestionBillet/AddBillet.vue'
-import DeleteBillet from '@/components/GestionBillet/DeleteBillet.vue'
-import AnnuleBillet from '@/components/GestionBillet/AnnuleBillet.vue'
-import ModifBillet from '@/components/GestionBillet/ModifBillet.vue'
+import AddClient from '@/components/GestionClient/AddClient.vue'
+import DeleteClient from '@/components/GestionClient/DeleteClient.vue'
+import AnnuleClient from '@/components/GestionClient/AnnuleClient.vue'
+import ModifClient from '@/components/GestionClient/ModifClient.vue'
 import { mapGetters } from 'vuex'
 
 moment.locale('fr')
 
 export default {
   components: {
-    AddBillet,
-    DeleteBillet,
-    AnnuleBillet,
-    ModifBillet
+    AddClient,
+    DeleteClient,
+    AnnuleClient,
+    ModifClient
   },
   data () {
     return {
       currentPage: 1,
       perPage: 5,
-      billetSelect: {},
+      clientSelect: {},
       periode: {
         end: new Date(
           moment().year(),
@@ -227,15 +197,23 @@ export default {
       },
       nom: '',
       prenom: '',
-      trajet: '',
-      depart: null,
-      arrive: null
+      nationalite: '',
+      dateDeNaissance: null,
+      arrive: null,
+      sexe: {
+        value: null,
+        options: [
+          { value: null, text: 'Recherche un sexe' },
+          { value: 'M', text: 'M' },
+          { value: 'F', text: 'F' }
+        ]
+      }
     }
   },
   computed: {
     ...mapGetters({
-      items: 'getTableBillet',
-      loading: 'getLoadingTableBillet',
+      items: 'getTableClient',
+      loading: 'getLoadingTableClient',
       currentUser: 'currentUser'
     }),
     fields () {
@@ -245,15 +223,10 @@ export default {
           { key: 'date', label: 'Date', sortable: true },
           { key: 'nom', label: 'Nom', sortable: true },
           { key: 'prenom', label: 'Prenom', sortable: true },
-          { key: 'type', label: 'Passager', sortable: true },
-          { key: 'aller', label: 'Billet', sortable: true },
-          { key: 'trajet', label: 'Trajet', sortable: true },
-          { key: 'dateDepart', label: 'Date depart', sortable: true },
-          { key: 'dateArrive', label: 'Date arrive', sortable: true },
-          { key: 'tarif', label: 'Tarif', sortable: true },
-          { key: 'commission', label: 'Commi.', sortable: true },
-          { key: 'reste', label: 'Reste', sortable: true },
-          { key: 'fs', label: 'FS', sortable: true },
+          { key: 'adresse', sortable: true },
+          { key: 'nationalite', label: 'Nationalite', sortable: true },
+          { key: 'dateDeNaissance', label: 'Date de naissance', sortable: true },
+          { key: 'sexe', sortable: true },
           'status',
           'actions'
         ]
@@ -263,14 +236,10 @@ export default {
         { key: 'date', label: 'Date', sortable: true },
         { key: 'nom', label: 'Nom', sortable: true },
         { key: 'prenom', label: 'Prenom', sortable: true },
-        { key: 'type', label: 'Passager', sortable: true },
-        { key: 'aller', label: 'Billet', sortable: true },
-        { key: 'trajet', label: 'Trajet', sortable: true },
-        { key: 'dateDepart', label: 'Date depart', sortable: true },
-        { key: 'dateArrive', label: 'Date arrive', sortable: true },
-        { key: 'tarif', label: 'Tarif', sortable: true },
-        { key: 'commission', label: 'Commi.', sortable: true },
-        { key: 'reste', label: 'Reste', sortable: true },
+        { key: 'adresse', sortable: true },
+        { key: 'nationalite', label: 'Nationalite', sortable: true },
+        { key: 'dateDeNaissance', label: 'Date de naissance', sortable: true },
+        { key: 'sexe', sortable: true },
         'actions'
       ]
     },
@@ -280,34 +249,6 @@ export default {
           moment(this.periode.end).isSameOrAfter(moment(el.date, 'll')))
       }
       return this.items
-    },
-    sommeTarif () {
-      let somme = 0
-      this.tempDataPeriode.forEach(el => {
-        somme = somme + parseInt(el.tarif, 10)
-      })
-      return somme
-    },
-    sommeCommi () {
-      let somme = 0
-      this.tempDataPeriode.forEach(el => {
-        somme = somme + parseInt(el.commission, 10)
-      })
-      return somme
-    },
-    sommeReste () {
-      let somme = 0
-      this.tempDataPeriode.forEach(el => {
-        somme = somme + parseInt(el.reste, 10)
-      })
-      return somme
-    },
-    sommeFs () {
-      let somme = 0
-      this.tempDataPeriode.forEach(el => {
-        somme = somme + parseInt(el.fs, 10)
-      })
-      return somme
     },
     table () {
       let data = this.items
@@ -324,21 +265,21 @@ export default {
       if (this.prenom) {
         data = data.filter(el => el.prenom.toLowerCase().includes(this.prenom.toLowerCase()))
       }
-      if (this.trajet) {
-        data = data.filter(el => el.trajet.toLowerCase().includes(this.trajet.toLowerCase()))
+      if (this.nationalite) {
+        data = data.filter(el => el.nationalite.toLowerCase().includes(this.nationalite.toLowerCase()))
       }
-      if (this.depart) {
-        data = data.filter(el => moment(el.dateDepart, 'll').format('ll') === moment(this.depart).format('ll'))
+      if (this.dateDeNaissance) {
+        data = data.filter(el => moment(el.dateDepart, 'll').format('ll') === moment(this.dateDeNaissance).format('ll'))
       }
-      if (this.arrive) {
-        data = data.filter(el => moment(el.dateArrive, 'll').format('ll') === moment(this.arrive).format('ll'))
+      if (this.sexe.value) {
+        data = data.filter(el => el.sexe === this.sexe.value)
       }
       return data
     }
   },
   methods: {
     selectBillet (data, refname) {
-      this.billetSelect = data
+      this.clientSelect = data
       this.$bvModal.show(refname)
     }
   }

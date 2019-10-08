@@ -1,16 +1,16 @@
 <template>
   <div>
     <b-modal
-      id="modal-delete-billet"
+      id="modal-annule-client"
       centered
-      title="Suppression d'un billet"
-      ok-title="Supprimer"
+      title="Annulation d'un client"
+      ok-title="Effectuer"
       cancel-title="Annuler"
       cancel-variant="danger"
-      @ok="deleteBillet"
+      @ok="annuleClient"
       no-close-on-backdrop>
       <p>
-        Etes vous sur de vouloir supprimer cette donnée?
+        Etes vous sur de vouloir annuler cette donnée?
       </p>
     </b-modal>
   </div>
@@ -22,15 +22,17 @@ import 'firebase/database'
 import { baseRef } from '@/constants/config'
 
 export default {
-  name: 'DeleteBillet',
+  name: 'AnnuleClient',
   props: ['id'],
   data: () => ({}),
   computed: {},
   methods: {
-    async deleteBillet () {
+    async annuleClient () {
       try {
-        await firebase.database().ref(`${baseRef.billet}/${this.id}`).remove()
-        this.$notify('success', '', 'Donnée supprimée', { duration: 3000, permanent: false })
+        await firebase.database().ref(`${baseRef.client}/`).child(this.id).update({
+          status: 'annulé'
+        })
+        this.$notify('success', '', 'Client annulé', { duration: 3000, permanent: false })
       } catch (error) {
         this.$notify('error', 'Erreur:', error, { duration: 3000, permanent: false })
       }

@@ -12,6 +12,10 @@
                 <span>{{ $t('user.fullname') }}</span>
               </label>
               <label class="form-group has-float-label mb-4">
+                <input type="text" class="form-control" v-model="status">
+                <span> Status </span>
+              </label>
+              <label class="form-group has-float-label mb-4">
                 <input type="email" class="form-control" v-model="email">
                 <span>{{ $t('user.email') }}</span>
               </label>
@@ -29,18 +33,30 @@
   </b-row>
 </template>
 <script>
+import firebase from 'firebase/app'
+import 'firebase/database'
+import 'firebase/auth'
+import { baseRef } from '@/constants/config'
+
 export default {
   data () {
     return {
       fullname: '',
       email: '',
+      status: '',
       password: ''
     }
   },
   methods: {
     formSubmit () {
-      console.log('register')
-      this.$router.push('/')
+      firebase.auth().createUserWithEmailAndPassword(this.email, this.password).then(user => {
+        firebase.database().ref(`${baseRef.user}/${user.user.uid}`).set({
+          id: user.user.uid,
+          fullname: this.fullname,
+          email: this.email,
+          status: this.status
+        })
+      })
     }
   }
 }

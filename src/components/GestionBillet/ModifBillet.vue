@@ -5,12 +5,9 @@
       size="lg"
       centered
       title="Modification d'un billet"
-      ok-title="Modifier"
-      cancel-title="Annuler"
-      cancel-variant="danger"
-      @ok="update"
       no-close-on-backdrop
-      @shown="updateDataModal">
+      @shown="updateDataModal"
+      ref="modal-modif-billet">
       <b-form>
         <b-row>
 
@@ -52,15 +49,12 @@
           </b-colxx>
           <b-colxx sm="6" v-if="!idClient">
             <b-form-group label="Nationalite">
-              <b-form-input
-                v-model.trim="nationalite.value"
-                :state="nationalite.state"
-                aria-describedby="msg-err-nationalite"
+              <vue-bootstrap-typeahead
+                v-model.trim="nationalite"
+                :data="listeNationalite"
                 placeholder="Nationalite du client"
-                @blur="validNationalite"/>
-              <b-form-invalid-feedback id="msg-err-nationalite">
-                Entrez une valeur valide
-              </b-form-invalid-feedback>
+                ref="nationaliteClientModalModif"
+              />
             </b-form-group>
           </b-colxx>
           <b-colxx sm="6" v-if="!idClient">
@@ -69,7 +63,7 @@
                 mode="single"
                 v-model="dateDeNaissance"
                 :input-props="{
-                  class:'form-control bg-white',
+                  class:'form-control colorTheme',
                   readonly: true,
                   placeholder: 'Date de naissance'
                 }"
@@ -87,7 +81,7 @@
           </b-colxx>
 
           <b-colxx sm="6">
-            <b-form-group label="Type">
+            <b-form-group label="Type de passager">
               <b-form-select
                 v-model="type.value"
                 :options="type.options"
@@ -96,11 +90,12 @@
             </b-form-group>
           </b-colxx>
           <b-colxx sm="6">
-            <b-form-group label="Aller">
+            <b-form-group label="Type de billet">
               <b-form-select
                 v-model="aller.value"
                 :options="aller.options"
-                :state="aller.state"/>
+                :state="aller.state"
+                plain/>
             </b-form-group>
           </b-colxx>
 
@@ -120,7 +115,7 @@
                 mode="single"
                 v-model="dateDepart"
                 :input-props="{
-                  class:'form-control bg-white',
+                  class:'form-control colorTheme',
                   readonly: true
                 }"
               />
@@ -132,14 +127,14 @@
                 mode="single"
                 v-model="dateArrive"
                 :input-props="{
-                  class:'form-control bg-white',
+                  class:'form-control colorTheme',
                   readonly: true
                 }"
               />
             </b-form-group>
           </b-col>
 
-          <b-colxx sm="4">
+          <b-col :cols="currentUser.status === 'admin' ? 3 : 4">
             <b-form-group label="Tarif">
               <b-form-input
                 type="number"
@@ -153,8 +148,8 @@
                 Entrez une valeur valide
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-colxx>
-          <b-colxx sm="4">
+          </b-col>
+          <b-col :cols="currentUser.status === 'admin' ? 3 : 4">
             <b-form-group label="Commission">
               <b-form-input
                 type="number"
@@ -167,8 +162,8 @@
                 Entrez une valeur valide
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-colxx>
-          <b-colxx sm="4">
+          </b-col>
+          <b-col :cols="currentUser.status === 'admin' ? 3 : 4">
             <b-form-group label="Reste">
               <b-form-input
                 type="number"
@@ -181,9 +176,22 @@
                 Entrez une valeur valide
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-colxx>
+          </b-col>
+          <b-col cols="3" v-if="currentUser.status === 'admin'">
+            <b-form-group label="FS">
+              <b-form-input
+                type="number"
+                v-model="fs"
+                placeholder="FS"/>
+            </b-form-group>
+          </b-col>
         </b-row>
       </b-form>
+
+      <template slot="modal-footer">
+          <b-button variant="danger" @click="hideModal('modal-modif-billet')">Annuler</b-button>
+          <b-button variant="primary" @click="update('modal-modif-billet')" class="mr-1">Enregistrer</b-button>
+      </template>
     </b-modal>
   </div>
 </template>
@@ -194,11 +202,7 @@ import 'firebase/database'
 import moment from 'moment'
 import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
 import { mapGetters } from 'vuex'
-
-const date = new Date()
-const y = date.getFullYear()
-const m = date.getMonth()
-const lastDay = new Date(y, m + 1, 0)
+import { baseRef } from '@/constants/config'
 
 moment.locale('fr')
 
@@ -211,11 +215,8 @@ export default {
   data: () => ({
     nom: '',
     prenom: '',
+    nationalite: '',
     adresse: {
-      value: '',
-      state: null
-    },
-    nationalite: {
       value: '',
       state: null
     },
@@ -249,8 +250,8 @@ export default {
         { value: 'AR', text: 'AR' }
       ]
     },
-    dateDepart: date,
-    dateArrive: lastDay,
+    dateDepart: null,
+    dateArrive: null,
     tarif: {
       value: 100000,
       state: null
@@ -260,12 +261,15 @@ export default {
       state: null
     },
     resteState: null,
+    fs: 0,
     idBillet: null
   }),
   computed: {
     ...mapGetters({
       listeClient: 'getTableClient',
-      listeTrajets: 'getTableTrajet'
+      listeTrajets: 'getTableTrajet',
+      listeNationalite: 'getTableNationalite',
+      currentUser: 'currentUser'
     }),
     reste () {
       return this.tarif.value - this.commission.value
@@ -279,20 +283,15 @@ export default {
     }
   },
   methods: {
+    hideModal (refname) {
+      this.$refs[refname].hide()
+    },
     validAdresse () {
       if (this.adresse.value) {
         this.adresse.state = null
         return true
       }
       this.adresse.state = false
-      return false
-    },
-    validNationalite () {
-      if (this.nationalite.value) {
-        this.nationalite.state = null
-        return true
-      }
-      this.nationalite.state = false
       return false
     },
     validType () {
@@ -335,64 +334,71 @@ export default {
       this.resteState = false
       return false
     },
-    reset () {
-      this.nom = ''
-      this.prenom = ''
-      this.adresse.value = ''
-      this.nationalite.value = ''
-      this.sexe.value = ''
-      this.type.value = null
-      this.aller.value = null
-      this.trajet = ''
-      this.tarif.value = 100000
-      this.commission.value = 0
+    valideBillet () {
+      const a = this.validType()
+      const b = this.validAller()
+      const c = this.validCommission()
+      const d = this.validReste()
+      const e = this.validTarif()
+      return this.nom && this.prenom && this.trajet && a && b && c && d && e
     },
-    async update (bvModalEvt) {
+    valideClient () {
+      return this.nom && this.prenom && this.validAdresse() && this.nationalite && this.sexe.value
+    },
+    saveClient () {
+      const id = firebase.database().ref().child(`${baseRef.client}`).push().key
+      firebase.database().ref(`${baseRef.client}/${id}`).set({
+        id: id,
+        nom: this.nom.toUpperCase(),
+        prenom: this.prenom.toUpperCase(),
+        adresse: this.adresse.value,
+        nationalite: this.nationalite,
+        dateDeNaissance: moment(this.dateDeNaissance).format('ll'),
+        sexe: this.sexe.value,
+        status: 'actif',
+        date: moment().format('lll')
+      })
+      return id
+    },
+    updateBillet (clientId) {
+      firebase.database().ref(`${baseRef.billet}/`).child(this.idBillet).update({
+        nom: this.nom.toUpperCase(),
+        prenom: this.prenom.toUpperCase(),
+        idClient: clientId,
+        type: this.type.value,
+        aller: this.aller.value,
+        trajet: this.trajet.toUpperCase(),
+        dateDepart: moment(this.dateDepart).format('ll'),
+        dateArrive: this.aller.value === 'AS' ? '---' : moment(this.dateArrive).format('ll'),
+        tarif: this.tarif.value,
+        commission: this.commission.value,
+        reste: this.reste,
+        date: moment().format('lll'),
+        fs: this.fs
+      })
+    },
+    async update (refname) {
       try {
-        let id = this.idClient
-        if (!id) {
-          if (this.nom && this.prenom && this.validAdresse && this.validNationalite && this.sexe.value) {
-            id = firebase.database().ref().child('clients').push().key
-            await firebase.database().ref('clients/' + id).set({
-              id: id,
-              nom: this.nom.toUpperCase(),
-              prenom: this.prenom.toUpperCase(),
-              adresse: this.adresse.value,
-              nationalite: this.nationalite.value,
-              dateDeNaissance: moment(this.dateDeNaissance).format('ll'),
-              sexe: this.sexe.value,
-              date: moment().format('lll')
-            })
+        if (!this.idClient) {
+          if (this.valideClient() && this.valideBillet()) {
+            const clientId = this.saveClient()
+            this.updateBillet(clientId)
+            this.$notify('success', '', 'Donnees modifiee', { duration: 3000, permanent: false })
+            this.hideModal(refname)
           } else {
-            this.$notify('error', 'Erreur:', 'vérifier les champs puis réessayer', { duration: 3000, permanent: false })
-            bvModalEvt.preventDefault()
+            this.$notify('error', 'Erreur:', 'Verifiez les champs', { duration: 3000, permanent: false })
           }
-        }
-        if (this.nom && this.prenom && this.validType() &&
-          this.validAller() && this.trajet && this.validCommission() &&
-          this.validReste() && this.validTarif()) {
-          await firebase.database().ref('billets/').child(this.idBillet).update({
-            nom: this.nom.toUpperCase(),
-            prenom: this.prenom.toUpperCase(),
-            idClient: id,
-            type: this.type.value,
-            aller: this.aller.value,
-            trajet: this.trajet.toUpperCase(),
-            dateDepart: moment(this.dateDepart).format('ll'),
-            dateArrive: this.aller.value === 'AS' ? '---' : moment(this.dateArrive).format('ll'),
-            tarif: this.tarif.value,
-            commission: this.commission.value,
-            reste: this.reste,
-            date: moment().format('lll')
-          })
-          this.$notify('success', '', 'Données enregistrées', { duration: 3000, permanent: false })
         } else {
-          this.$notify('error', 'Erreur:', 'vérifier les champs puis réessayer', { duration: 3000, permanent: false })
-          bvModalEvt.preventDefault()
+          if (this.valideBillet()) {
+            this.updateBillet(this.idClient)
+            this.$notify('success', '', 'Donnees modifiee', { duration: 3000, permanent: false })
+            this.hideModal(refname)
+          } else {
+            this.$notify('error', 'Erreur:', 'Verifiez les champs', { duration: 3000, permanent: false })
+          }
         }
       } catch (error) {
         this.$notify('error', 'Erreur:', error, { duration: 3000, permanent: false })
-        bvModalEvt.preventDefault()
       }
     },
     updateDataModal () {
@@ -405,8 +411,19 @@ export default {
       this.aller.value = this.data.aller
       this.trajet = this.data.trajet
       this.tarif.value = this.data.tarif
+      this.fs = this.data.fs
       this.commission.value = this.data.commission
       this.idBillet = this.data.id
+      this.dateDepart = new Date(
+        moment(this.data.dateDepart, 'll').year(),
+        moment(this.data.dateDepart, 'll').month(),
+        moment(this.data.dateDepart, 'll').date()
+      )
+      this.dateArrive = this.data.dateArrive ? new Date(
+        moment(this.data.dateArrive, 'll').year(),
+        moment(this.data.dateArrive, 'll').month(),
+        moment(this.data.dateArrive, 'll').date()
+      ) : null
     }
   }
 }

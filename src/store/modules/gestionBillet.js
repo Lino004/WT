@@ -1,6 +1,7 @@
 export default {
   state: {
-    tableBillet: []
+    tableBillet: [],
+    loading: false
   },
   getters: {
     getTableBillet: state => {
@@ -21,16 +22,25 @@ export default {
         }
       })
       return table
+    },
+    getLoadingTableBillet: state => {
+      return state.loading
     }
   },
   mutations: {
     TABLE_BILLET (state, data) {
       state.tableBillet = data
+    },
+    LOARDING_BILLET (state, data) {
+      state.loading = data
     }
   },
   actions: {
     updateTableBillet ({ commit }, data) {
       commit('TABLE_BILLET', data)
+    },
+    updateLoadingBillet ({ commit }, data) {
+      commit('LOARDING_BILLET', data)
     }
   }
 }

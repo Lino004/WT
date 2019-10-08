@@ -15,6 +15,7 @@ import TopNav from '@/containers/TopNav'
 import { mapGetters, mapActions } from 'vuex'
 import firebase from 'firebase/app'
 import 'firebase/database'
+import { baseRef } from '@/constants/config'
 
 export default {
   data () {
@@ -30,25 +31,33 @@ export default {
   methods: {
     ...mapActions([
       'updateTableBillet',
-      'updateTableClient'
+      'updateTableClient',
+      'updateLoadingBillet',
+      'updateLoadingClient'
     ]),
     getBillet () {
-      firebase.database().ref('billets/').on('value', (snap) => {
+      this.updateLoadingBillet(true)
+      firebase.database().ref(`${baseRef.billet}/`).on('value', (snap) => {
         if (snap.val()) {
+          this.updateLoadingBillet(false)
           const data = Object.values(snap.val())
           this.updateTableBillet(data)
         } else {
+          this.updateLoadingBillet(false)
           const data = []
           this.updateTableBillet(data)
         }
       })
     },
     getClient () {
-      firebase.database().ref('clients/').on('value', (snap) => {
+      this.updateLoadingClient(true)
+      firebase.database().ref(`${baseRef.client}/`).on('value', (snap) => {
         if (snap.val()) {
+          this.updateLoadingClient(false)
           const data = Object.values(snap.val())
           this.updateTableClient(data)
         } else {
+          this.updateLoadingClient(false)
           const data = []
           this.updateTableClient(data)
         }
@@ -60,8 +69,8 @@ export default {
     this.getClient()
   },
   destroyed () {
-    firebase.database().ref('billets/').off()
-    firebase.database().ref('clients/').off()
+    firebase.database().ref(`${baseRef.billet}/`).off()
+    firebase.database().ref(`${baseRef.client}/`).off()
   }
 }
 </script>

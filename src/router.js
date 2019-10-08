@@ -14,6 +14,10 @@ const routes = [
       {
         path: 'app/gestion-billet',
         component: () => import('./views/app/gestionBillet')
+      },
+      {
+        path: 'app/gestion-client',
+        component: () => import('./views/app/gestionClient')
       }
     ]
   },

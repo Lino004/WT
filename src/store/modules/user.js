@@ -1,6 +1,7 @@
 import firebase from 'firebase/app'
 import 'firebase/auth'
-import { currentUser } from '@/constants/config'
+import 'firebase/database'
+import { baseRef } from '@/constants/config'
 
 export default {
   state: {
@@ -47,9 +48,11 @@ export default {
         .signInWithEmailAndPassword(payload.email, payload.password)
         .then(
           user => {
-            const item = { uid: user.user.uid, ...currentUser }
-            localStorage.setItem('user', JSON.stringify(item))
-            commit('setUser', { uid: user.user.uid, ...currentUser })
+            firebase.database().ref(`${baseRef.user}/${user.user.uid}`).once('value', (snap) => {
+              const item = { uid: user.user.uid, ...snap.val() }
+              localStorage.setItem('user', JSON.stringify(item))
+              commit('setUser', { uid: user.user.uid, ...snap.val() })
+            })
           },
           err => {
             localStorage.removeItem('user')

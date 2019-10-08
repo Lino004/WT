@@ -6,12 +6,9 @@
       size="lg"
       centered
       title="Enregistrement d'un billet"
-      ok-title="Enregistrer"
-      cancel-title="Annuler"
-      cancel-variant="danger"
-      @ok="save"
       no-close-on-backdrop
-      @hide="reset">
+      @hide="reset"
+      ref="modal-add-billet">
       <b-form>
         <b-row>
 
@@ -53,15 +50,12 @@
           </b-colxx>
           <b-colxx sm="6" v-if="!idClient">
             <b-form-group label="Nationalite">
-              <b-form-input
-                v-model.trim="nationalite.value"
-                :state="nationalite.state"
-                aria-describedby="msg-err-nationalite"
+              <vue-bootstrap-typeahead
+                v-model.trim="nationalite"
+                :data="listeNationalite"
                 placeholder="Nationalite du client"
-                @blur="validNationalite"/>
-              <b-form-invalid-feedback id="msg-err-nationalite">
-                Entrez une valeur valide
-              </b-form-invalid-feedback>
+                ref="nationaliteClientModalAdd"
+              />
             </b-form-group>
           </b-colxx>
           <b-colxx sm="6" v-if="!idClient">
@@ -70,7 +64,7 @@
                 mode="single"
                 v-model="dateDeNaissance"
                 :input-props="{
-                  class:'form-control bg-white',
+                  class:'form-control colorTheme',
                   readonly: true,
                   placeholder: 'Date de naissance'
                 }"
@@ -90,7 +84,7 @@
           <b-colxx sm="6">
             <b-form-group label="Type de passager">
               <b-form-select
-                v-model="type.value"
+                v-model.lazy="type.value"
                 :options="type.options"
                 :state="type.state"
                 plain/>
@@ -99,7 +93,7 @@
           <b-colxx sm="6">
             <b-form-group label="Type de billet">
               <b-form-select
-                v-model="aller.value"
+                v-model.lazy="aller.value"
                 :options="aller.options"
                 :state="aller.state"
                 plain/>
@@ -112,6 +106,7 @@
                 v-model.trim="trajet"
                 :data="listeTrajets"
                 placeholder="Entrez le traje du vol..."
+                ref="trajetClientModalAdd"
               />
             </b-form-group>
           </b-col>
@@ -121,7 +116,7 @@
                 mode="single"
                 v-model="dateDepart"
                 :input-props="{
-                  class:'form-control bg-white',
+                  class:'form-control colorTheme',
                   readonly: true
                 }"
               />
@@ -133,14 +128,14 @@
                 mode="single"
                 v-model="dateArrive"
                 :input-props="{
-                  class:'form-control bg-white',
+                  class:'form-control colorTheme',
                   readonly: true
                 }"
               />
             </b-form-group>
           </b-col>
 
-          <b-colxx sm="4">
+          <b-col :cols="currentUser.status === 'admin' ? 3 : 4">
             <b-form-group label="Tarif">
               <b-form-input
                 type="number"
@@ -154,8 +149,8 @@
                 Entrez une valeur valide
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-colxx>
-          <b-colxx sm="4">
+          </b-col>
+          <b-col :cols="currentUser.status === 'admin' ? 3 : 4">
             <b-form-group label="Commission">
               <b-form-input
                 type="number"
@@ -168,8 +163,8 @@
                 Entrez une valeur valide
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-colxx>
-          <b-colxx sm="4">
+          </b-col>
+          <b-col :cols="currentUser.status === 'admin' ? 3 : 4">
             <b-form-group label="Reste">
               <b-form-input
                 type="number"
@@ -182,9 +177,22 @@
                 Entrez une valeur valide
               </b-form-invalid-feedback>
             </b-form-group>
-          </b-colxx>
+          </b-col>
+          <b-col cols="3" v-if="currentUser.status === 'admin'">
+            <b-form-group label="FS">
+              <b-form-input
+                type="number"
+                v-model="fs"
+                placeholder="FS"/>
+            </b-form-group>
+          </b-col>
         </b-row>
       </b-form>
+
+      <template slot="modal-footer">
+          <b-button variant="danger" @click="hideModal('modal-add-billet')">Annuler</b-button>
+          <b-button variant="primary" @click="save('modal-add-billet')" class="mr-1">Enregistrer</b-button>
+      </template>
     </b-modal>
   </div>
 </template>
@@ -195,6 +203,7 @@ import 'firebase/database'
 import moment from 'moment'
 import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
 import { mapGetters } from 'vuex'
+import { baseRef } from '@/constants/config'
 
 const date = new Date()
 const y = date.getFullYear()
@@ -211,11 +220,8 @@ export default {
   data: () => ({
     nom: '',
     prenom: '',
+    nationalite: '',
     adresse: {
-      value: '',
-      state: null
-    },
-    nationalite: {
       value: '',
       state: null
     },
@@ -259,12 +265,15 @@ export default {
       value: 0,
       state: null
     },
+    fs: 0,
     resteState: null
   }),
   computed: {
     ...mapGetters({
       listeClient: 'getTableClient',
-      listeTrajets: 'getTableTrajet'
+      listeTrajets: 'getTableTrajet',
+      listeNationalite: 'getTableNationalite',
+      currentUser: 'currentUser'
     }),
     reste () {
       return this.tarif.value - this.commission.value
@@ -278,20 +287,15 @@ export default {
     }
   },
   methods: {
+    hideModal (refname) {
+      this.$refs[refname].hide()
+    },
     validAdresse () {
       if (this.adresse.value) {
         this.adresse.state = null
         return true
       }
       this.adresse.state = false
-      return false
-    },
-    validNationalite () {
-      if (this.nationalite.value) {
-        this.nationalite.state = null
-        return true
-      }
-      this.nationalite.state = false
       return false
     },
     validType () {
@@ -337,65 +341,87 @@ export default {
     reset () {
       this.$refs.nomClientModalAdd.inputValue = ''
       this.$refs.prenomClientModalAdd.inputValue = ''
+      this.$refs.trajetClientModalAdd.inputValue = ''
+      this.$refs.nationaliteClientModalAdd.inputValue = ''
       this.nom = ''
       this.prenom = ''
       this.adresse.value = ''
-      this.nationalite.value = ''
-      this.sexe.value = ''
+      this.sexe.value = null
       this.type.value = null
       this.aller.value = null
       this.trajet = ''
       this.tarif.value = 100000
       this.commission.value = 0
+      this.fs = 0
     },
-    async save (bvModalEvt) {
+    valideBillet () {
+      const a = this.validType()
+      const b = this.validAller()
+      const c = this.validCommission()
+      const d = this.validReste()
+      const e = this.validTarif()
+      return this.nom && this.prenom && this.trajet && a && b && c && d && e
+    },
+    valideClient () {
+      return this.nom && this.prenom && this.nationalite && this.validAdresse() && this.sexe.value
+    },
+    saveClient () {
+      const id = firebase.database().ref().child(`${baseRef.client}`).push().key
+      firebase.database().ref(`${baseRef.client}/${id}`).set({
+        id: id,
+        nom: this.nom.toUpperCase(),
+        prenom: this.prenom.toUpperCase(),
+        adresse: this.adresse.value,
+        nationalite: this.nationalite,
+        dateDeNaissance: moment(this.dateDeNaissance).format('ll'),
+        sexe: this.sexe.value,
+        status: 'actif',
+        date: moment().format('lll')
+      })
+      return id
+    },
+    saveBillet (clientId) {
+      const keyData = firebase.database().ref().child(`${baseRef.billet}`).push().key
+      firebase.database().ref(`${baseRef.billet}/${keyData}`).set({
+        id: keyData,
+        nom: this.nom.toUpperCase(),
+        prenom: this.prenom.toUpperCase(),
+        idClient: clientId,
+        type: this.type.value,
+        aller: this.aller.value,
+        trajet: this.trajet.toUpperCase(),
+        dateDepart: moment(this.dateDepart).format('ll'),
+        dateArrive: this.aller.value === 'AS' ? '---' : moment(this.dateArrive).format('ll'),
+        tarif: this.tarif.value,
+        commission: this.commission.value,
+        reste: this.reste,
+        date: moment().format('lll'),
+        status: 'actif',
+        fs: this.fs
+      })
+    },
+    async save (refname) {
       try {
-        let id = this.idClient
-        if (!id) {
-          if (this.nom && this.prenom && this.validAdresse && this.validNationalite && this.sexe.value) {
-            id = firebase.database().ref().child('clients').push().key
-            await firebase.database().ref('clients/' + id).set({
-              id: id,
-              nom: this.nom.toUpperCase(),
-              prenom: this.prenom.toUpperCase(),
-              adresse: this.adresse.value,
-              nationalite: this.nationalite.value,
-              dateDeNaissance: moment(this.dateDeNaissance).format('ll'),
-              sexe: this.sexe.value,
-              date: moment().format('lll')
-            })
+        if (!this.idClient) {
+          if (this.valideClient() && this.valideBillet()) {
+            const clientId = this.saveClient()
+            this.saveBillet(clientId)
+            this.$notify('success', '', 'Donnees enregistree', { duration: 3000, permanent: false })
+            this.hideModal(refname)
           } else {
-            this.$notify('error', 'Erreur:', 'vérifier les champs puis réessayer', { duration: 3000, permanent: false })
-            bvModalEvt.preventDefault()
+            this.$notify('error', 'Erreur:', 'Verifiez les champs', { duration: 3000, permanent: false })
           }
-        }
-        if (this.nom && this.prenom && this.validType() &&
-          this.validAller() && this.trajet && this.validCommission() &&
-          this.validReste() && this.validTarif()) {
-          const keyData = firebase.database().ref().child('billets').push().key
-          await firebase.database().ref('billets/' + keyData).set({
-            id: keyData,
-            nom: this.nom.toUpperCase(),
-            prenom: this.prenom.toUpperCase(),
-            idClient: id,
-            type: this.type.value,
-            aller: this.aller.value,
-            trajet: this.trajet.toUpperCase(),
-            dateDepart: moment(this.dateDepart).format('ll'),
-            dateArrive: this.aller.value === 'AS' ? '---' : moment(this.dateArrive).format('ll'),
-            tarif: this.tarif.value,
-            commission: this.commission.value,
-            reste: this.reste,
-            date: moment().format('lll')
-          })
-          this.$notify('success', '', 'Données enregistrées', { duration: 3000, permanent: false })
         } else {
-          this.$notify('error', 'Erreur:', 'vérifier les champs puis réessayer', { duration: 3000, permanent: false })
-          bvModalEvt.preventDefault()
+          if (this.valideBillet()) {
+            this.saveBillet(this.idClient)
+            this.$notify('success', '', 'Donnees enregistree', { duration: 3000, permanent: false })
+            this.hideModal(refname)
+          } else {
+            this.$notify('error', 'Erreur:', 'Verifiez les champs', { duration: 3000, permanent: false })
+          }
         }
       } catch (error) {
         this.$notify('error', 'Erreur:', error, { duration: 3000, permanent: false })
-        bvModalEvt.preventDefault()
       }
     }
   }

@@ -47,3 +47,15 @@ export const colors = [
   'light.red',
   'dark.red'
 ]
+
+/* export const baseRef = {
+  billet: 'billets',
+  client: 'clients',
+  user: 'users'
+} */
+
+export const baseRef = {
+  billet: 'billetsText',
+  client: 'clientsText',
+  user: 'users'
+}

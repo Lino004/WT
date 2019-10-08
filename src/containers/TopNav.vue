@@ -122,7 +122,7 @@
           </b-dropdown>
         </div>
 
-        <div class="position-relative d-inline-block">
+        <!-- <div class="position-relative d-inline-block">
           <b-dropdown
             variant="empty"
             size="sm"
@@ -157,7 +157,7 @@
               </div>
             </vue-perfect-scrollbar>
           </b-dropdown>
-        </div>
+        </div> -->
         <div class="position-relative d-none d-sm-inline-block ">
           <div class="btn-group">
             <b-button
@@ -179,17 +179,17 @@
           no-caret
         >
           <template slot="button-content">
-            <span class="name mr-1">{{currentUser.title}}</span>
+            <span class="name mr-1">{{currentUser.fullname}}</span>
             <span>
-              <img :alt="currentUser.title" :src="currentUser.img" />
+              <img :alt="currentUser.fullname" :src="getImg()" />
             </span>
-          </template>
+          </template><!--
           <b-dropdown-item>Account</b-dropdown-item>
           <b-dropdown-item>Features</b-dropdown-item>
           <b-dropdown-item>History</b-dropdown-item>
           <b-dropdown-item>Support</b-dropdown-item>
-          <b-dropdown-divider />
-          <b-dropdown-item @click="logout">Sign out</b-dropdown-item>
+          <b-dropdown-divider /> -->
+          <b-dropdown-item @click="logout">Deconnexion</b-dropdown-item>
         </b-dropdown>
       </div>
     </div>
@@ -311,6 +311,9 @@ export default {
           document.mozFullScreenElement !== null) ||
         (document.msFullscreenElement && document.msFullscreenElement !== null)
       )
+    },
+    getImg () {
+      return require('@/assets/img/default-user.png')
     }
   },
   computed: {
