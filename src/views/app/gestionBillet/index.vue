@@ -75,6 +75,15 @@
                 </b-colxx>
               </b-row>
             </div>
+            <div class="p-2">
+              <PrintBillet
+                v-if="table.length"
+                :table="tempDataPeriode"
+                :periode="periode"
+                :sommeTarif="sommeTarif"
+                :sommeCommi="sommeCommi"
+                :sommeReste="sommeReste"/>
+              </div>
             <div class="p-2"> <AddBillet/> </div>
           </div>
         </b-card-title>
@@ -197,6 +206,7 @@ import AddBillet from '@/components/GestionBillet/AddBillet.vue'
 import DeleteBillet from '@/components/GestionBillet/DeleteBillet.vue'
 import AnnuleBillet from '@/components/GestionBillet/AnnuleBillet.vue'
 import ModifBillet from '@/components/GestionBillet/ModifBillet.vue'
+import PrintBillet from '@/components/GestionBillet/PrintBillet.vue'
 import { mapGetters } from 'vuex'
 
 moment.locale('fr')
@@ -206,7 +216,8 @@ export default {
     AddBillet,
     DeleteBillet,
     AnnuleBillet,
-    ModifBillet
+    ModifBillet,
+    PrintBillet
   },
   data () {
     return {
@@ -277,7 +288,7 @@ export default {
     tempDataPeriode () {
       if (this.periode) {
         return this.items.filter(el => moment(this.periode.start).isSameOrBefore(moment(el.date, 'll')) &&
-          moment(this.periode.end).isSameOrAfter(moment(el.date, 'll')))
+          moment(this.periode.end).isSameOrAfter(moment(el.date, 'll')) && el.status === 'actif')
       }
       return this.items
     },

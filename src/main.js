@@ -29,6 +29,22 @@ import 'v-calendar/lib/v-calendar.min.css'
 import VueScrollTo from 'vue-scrollto'
 import firebase from 'firebase/app'
 import 'firebase/auth'
+import VueHtmlToPaper from 'vue-html-to-paper'
+
+const options = {
+  name: '_blank',
+  specs: [
+    'fullscreen=yes',
+    'titlebar=yes',
+    'scrollbars=yes'
+  ],
+  styles: [
+    'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css',
+    'https://unpkg.com/kidlat-css/css/kidlat.css'
+  ]
+}
+
+Vue.use(VueHtmlToPaper, options)
 
 Vue.use(BootstrapVue)
 Vue.use(VueI18n)

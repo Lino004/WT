@@ -48,14 +48,14 @@ export const colors = [
   'dark.red'
 ]
 
-/* export const baseRef = {
+export const baseRef = {
   billet: 'billets',
   client: 'clients',
   user: 'users'
-} */
+}
 
-export const baseRef = {
+/* export const baseRef = {
   billet: 'billetsText',
   client: 'clientsText',
   user: 'users'
-}
+} */
