@@ -28,6 +28,15 @@
               <a><i class="simple-icon-people"></i>  {{ $t("menu.gestion-client") }}</a>
             </router-link>
           </li>
+          <li :class="{ active : selectedParentMenu==='gestion-autre'}"
+            v-if="currentUser.status === 'admin'">
+            <router-link
+              :class="{ active : selectedParentMenu==='gestion-autre' }"
+              @click.native="changeSelectedParentHasNoSubmenu('gestion-autre')"
+              to="/app/gestion-autre" tag="li">
+              <a><i class="simple-icon-list"></i>  {{ $t("menu.gestion-autre") }}</a>
+            </router-link>
+          </li>
         </ul>
       </vue-perfect-scrollbar>
     </div>
@@ -195,7 +204,8 @@ export default {
     ...mapGetters({
       menuType: 'getMenuType',
       menuClickCount: 'getMenuClickCount',
-      selectedMenuHasSubItems: 'getSelectedMenuHasSubItems'
+      selectedMenuHasSubItems: 'getSelectedMenuHasSubItems',
+      currentUser: 'currentUser'
     })
   },
   watch: {

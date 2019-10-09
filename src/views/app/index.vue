@@ -32,8 +32,10 @@ export default {
     ...mapActions([
       'updateTableBillet',
       'updateTableClient',
+      'updateTableAutre',
       'updateLoadingBillet',
-      'updateLoadingClient'
+      'updateLoadingClient',
+      'updateLoadingAutre'
     ]),
     getBillet () {
       this.updateLoadingBillet(true)
@@ -62,15 +64,31 @@ export default {
           this.updateTableClient(data)
         }
       })
+    },
+    getAutre () {
+      this.updateLoadingAutre(true)
+      firebase.database().ref(`${baseRef.autre}/`).on('value', (snap) => {
+        if (snap.val()) {
+          this.updateLoadingAutre(false)
+          const data = Object.values(snap.val())
+          this.updateTableAutre(data)
+        } else {
+          this.updateLoadingAutre(false)
+          const data = []
+          this.updateTableAutre(data)
+        }
+      })
     }
   },
   mounted () {
     this.getBillet()
     this.getClient()
+    this.getAutre()
   },
   destroyed () {
     firebase.database().ref(`${baseRef.billet}/`).off()
     firebase.database().ref(`${baseRef.client}/`).off()
+    firebase.database().ref(`${baseRef.autre}/`).off()
   }
 }
 </script>

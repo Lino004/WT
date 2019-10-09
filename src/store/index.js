@@ -6,6 +6,7 @@ import menu from './modules/menu'
 import user from './modules/user'
 import gestionBillet from './modules/gestionBillet'
 import gestionClient from './modules/gestionClients'
+import gestionAutre from './modules/gestionAutre'
 
 Vue.use(Vuex)
 
@@ -29,6 +30,7 @@ export const store = new Vuex.Store({
     menu,
     user,
     gestionBillet,
-    gestionClient
+    gestionClient,
+    gestionAutre
   }
 })

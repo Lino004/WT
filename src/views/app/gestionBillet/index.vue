@@ -21,7 +21,7 @@
                       :input-props="{
                         class:'form-control colorTheme',
                         readonly: true,
-                        placeholder: 'Recherche sur une periode'
+                        placeholder: 'Filtre sur une periode'
                       }"
                     />
                   </b-form-group>
@@ -30,21 +30,21 @@
                   <b-form-group>
                     <b-form-input
                       v-model.trim="nom"
-                      placeholder="Recherche sur le nom"/>
+                      placeholder="Filtre sur le nom"/>
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
                   <b-form-group>
                     <b-form-input
                       v-model.trim="prenom"
-                      placeholder="Recherche sur le prenom"/>
+                      placeholder="Filtre sur le prenom"/>
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
                   <b-form-group>
                     <b-form-input
                       v-model.trim="trajet"
-                      placeholder="Recherche sur le trajet"/>
+                      placeholder="Filtre sur le trajet"/>
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
@@ -55,7 +55,7 @@
                       :input-props="{
                         class:'form-control colorTheme',
                         readonly: false,
-                        placeholder: 'Recherche sur une date de depart'
+                        placeholder: 'Filtre sur une date de depart'
                       }"
                     />
                   </b-form-group>
@@ -68,7 +68,7 @@
                       :input-props="{
                         class:'form-control colorTheme',
                         readonly: false,
-                        placeholder: 'Recherche sur une date arrive'
+                        placeholder: 'Filtre sur une date arrive'
                       }"
                     />
                   </b-form-group>

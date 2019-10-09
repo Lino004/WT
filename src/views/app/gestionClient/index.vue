@@ -21,7 +21,7 @@
                       :input-props="{
                         class:'form-control colorTheme',
                         readonly: true,
-                        placeholder: 'Recherche sur une periode'
+                        placeholder: 'Filtre sur une periode'
                       }"
                     />
                   </b-form-group>
@@ -30,14 +30,14 @@
                   <b-form-group>
                     <b-form-input
                       v-model.trim="nom"
-                      placeholder="Recherche sur le nom"/>
+                      placeholder="Filtre sur le nom"/>
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
                   <b-form-group>
                     <b-form-input
                       v-model.trim="prenom"
-                      placeholder="Recherche sur le prenom"/>
+                      placeholder="Filtre sur le prenom"/>
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
@@ -203,7 +203,7 @@ export default {
       sexe: {
         value: null,
         options: [
-          { value: null, text: 'Recherche un sexe' },
+          { value: null, text: 'Filtre un sexe' },
           { value: 'M', text: 'M' },
           { value: 'F', text: 'F' }
         ]

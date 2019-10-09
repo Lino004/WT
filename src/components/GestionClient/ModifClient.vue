@@ -1,6 +1,5 @@
 <template>
   <div>
-    <a v-b-modal.modal-modif-client class="text-primary cursor"><i class="iconsminds-modif h1"></i></a>
     <b-modal
       id="modal-modif-client"
       size="lg"
@@ -141,7 +140,7 @@ export default {
   computed: {
     ...mapGetters({
       listeNationalite: 'getTableNationalite',
-      listeBillet: 'getTableBillet'
+      listeClient: 'getTableClient'
     })
   },
   methods: {
@@ -196,10 +195,10 @@ export default {
       try {
         if (this.valideClient()) {
           this.updateClient()
-          const liste = this.listeBillet.filter(el => el.idClient === this.idClient)
+          const liste = this.listeClient.filter(el => el.idClient === this.idClient)
           if (liste.length) {
             liste.forEach(el => {
-              this.updateBillet(el.id)
+              this.updateClient(el.id)
             })
           }
           this.$notify('success', '', 'Donnees enregistree', { duration: 3000, permanent: false })

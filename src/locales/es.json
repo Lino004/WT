@@ -19,6 +19,7 @@
   "menu": {
     "gestion-billet": "Gestion billet",
     "gestion-client": "Gestion Clients",
+    "gestion-autre": "Gestion Autre",
     "app": "Inicio",
     "piaf": "Piaf",
     "dashboards": "Tableros",

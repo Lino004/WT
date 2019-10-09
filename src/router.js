@@ -18,6 +18,10 @@ const routes = [
       {
         path: 'app/gestion-client',
         component: () => import('./views/app/gestionClient')
+      },
+      {
+        path: 'app/gestion-autre',
+        component: () => import('./views/app/gestionAutre')
       }
     ]
   },
@@ -28,8 +32,7 @@ const routes = [
     redirect: '/user/login',
     children: [
       { path: 'login', component: () => import('./views/user/Login') },
-      { path: 'register', component: () => import('./views/user/Register') },
-      { path: 'forgot-password', component: () => import('./views/user/ForgotPassword') }
+      { path: 'register', component: () => import('./views/user/Register') }
     ]
   },
   { path: '*', component: () => import('./views/Error') }
