@@ -8,7 +8,7 @@
   </b-row>
   <b-row>
     <b-colxx xxs="12">
-      <b-card class="mb-4">
+      <b-card class="mb-4 radius-20">
         <b-card-title class="mb-1">
           <div class="d-flex">
             <div class="p-2 align-self-center flex-grow-1">
@@ -82,9 +82,18 @@
           :fields="fields"
           :current-page="currentPage"
           :per-page="perPage"
-          :busy="loading">
+          :busy="loading"
+          selectable
+          select-mode="single"
+          @row-selected="onRowSelected">
           <template v-slot:cell(type)="data">
             <div class="text-capitalize"> {{data.value}} </div>
+          </template>
+          <template v-slot:cell(date)="data">
+            <div> {{formatDateLLL(data.value)}} </div>
+          </template>
+          <template v-slot:cell(dateDeNaissance)="data">
+            <div> {{formatDateLL(data.value)}} </div>
           </template>
           <template v-slot:cell(tarif)="data">
             <h6><b-badge variant="primary"> {{new Intl.NumberFormat().format(data.value)}} </b-badge></h6>
@@ -104,18 +113,18 @@
           <template v-slot:cell(actions)="data">
             <span
               class="h6 text-danger cursor"
-              @click="selectBillet(data.item, 'modal-delete-client')"
+              @click.stop="selectBillet(data.item, 'modal-delete-client')"
               v-if="currentUser.status === 'admin'">
               <i class="simple-icon-trash"></i>
             </span>
             <span
               class="h6 text-secondary cursor"
-              @click="selectBillet(data.item, 'modal-annule-client')">
+              @click.stop="selectBillet(data.item, 'modal-annule-client')">
               <i class="iconsminds-close"></i>
             </span>
             <span
               class="h6 text-primary cursor"
-              @click="selectBillet(data.item, 'modal-modif-client')">
+              @click.stop="selectBillet(data.item, 'modal-modif-client')">
               <i class="simple-icon-note"></i>
             </span>
           </template>
@@ -154,6 +163,7 @@
         <DeleteClient :id="clientSelect.id"/>
         <AnnuleClient :id="clientSelect.id"/>
         <ModifClient :data="clientSelect"/>
+        <DetailsClient :id="clientSelect.id"/>
 
       </b-card>
     </b-colxx>
@@ -167,6 +177,7 @@ import AddClient from '@/components/GestionClient/AddClient.vue'
 import DeleteClient from '@/components/GestionClient/DeleteClient.vue'
 import AnnuleClient from '@/components/GestionClient/AnnuleClient.vue'
 import ModifClient from '@/components/GestionClient/ModifClient.vue'
+import DetailsClient from '@/components/GestionClient/DetailsClient.vue'
 import { mapGetters } from 'vuex'
 
 moment.locale('fr')
@@ -176,7 +187,8 @@ export default {
     AddClient,
     DeleteClient,
     AnnuleClient,
-    ModifClient
+    ModifClient,
+    DetailsClient
   },
   data () {
     return {
@@ -281,6 +293,17 @@ export default {
     selectBillet (data, refname) {
       this.clientSelect = data
       this.$bvModal.show(refname)
+    },
+    formatDateLL (date) {
+      if (date === '---') return date
+      return moment(date, 'll').format('DD/MM/YY')
+    },
+    formatDateLLL (date) {
+      return moment(date, 'lll').format('DD/MM/YY hh:mm')
+    },
+    onRowSelected (items) {
+      this.clientSelect = items[0]
+      this.$bvModal.show('modal-detail-client')
     }
   }
 }

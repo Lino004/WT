@@ -83,6 +83,12 @@
                 plain/>
             </b-form-group>
           </b-colxx>
+          <b-colxx sm="12">
+            <b-form-group label="Numéros de fidélité"
+              description="Appuyer sur entrer pour valider">
+              <input-tag v-model="numeroFidelite" placeholder="Entrez le(s) numéro(s)"></input-tag>
+            </b-form-group>
+          </b-colxx>
 
         </b-row>
       </b-form>
@@ -100,6 +106,7 @@ import firebase from 'firebase/app'
 import 'firebase/database'
 import moment from 'moment'
 import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
+import InputTag from '@/components/Form/InputTag'
 import { mapGetters } from 'vuex'
 import { baseRef } from '@/constants/config'
 
@@ -109,7 +116,8 @@ export default {
   name: 'AddClient',
   props: ['data'],
   components: {
-    VueBootstrapTypeahead
+    VueBootstrapTypeahead,
+    InputTag
   },
   data: () => ({
     nom: {
@@ -120,6 +128,7 @@ export default {
       value: '',
       state: null
     },
+    numeroFidelite: [],
     adresse: {
       value: '',
       state: null
@@ -182,6 +191,7 @@ export default {
         nationalite: this.nationalite,
         dateDeNaissance: moment(this.dateDeNaissance).format('ll'),
         sexe: this.sexe.value,
+        numeroFidelite: this.numeroFidelite,
         date: moment().format('lll')
       })
     },
@@ -216,6 +226,7 @@ export default {
       this.prenom.value = this.data.prenom
       this.adresse.value = this.data.adresse
       this.nationalite = this.data.nationalite
+      this.numeroFidelite = this.data.numeroFidelite
       this.sexe.value = this.data.sexe
       this.dateDeNaissance = new Date(
         moment(this.data.dateDeNaissance, 'll').year(),

@@ -1,5 +1,5 @@
 <template>
-<div v-if="currentUser.status === 'admin'">
+<div>
   <b-row>
     <b-colxx xxs="12">
       <piaf-breadcrumb :heading="$t('menu.gestion-autre')"/>
@@ -8,12 +8,12 @@
   </b-row>
   <b-row>
     <b-colxx xxs="12">
-      <b-card class="mb-4">
+      <b-card class="mb-4 radius-20">
         <b-card-title class="mb-1">
           <div class="d-flex">
             <div class="p-2 align-self-center flex-grow-1">
               <b-row>
-                <b-colxx>
+                <b-colxx v-if="currentUser.status === 'admin'">
                   <b-form-group>
                     <v-date-picker
                       mode="range"
@@ -75,7 +75,7 @@
           <template v-slot:cell(montant)="data">
             <h6>
               <b-badge
-                variant="primary"
+                variant="warning"
                 :id="`modif-autre-${data.index}`">
                 {{new Intl.NumberFormat().format(data.value)}}
               </b-badge>
@@ -125,12 +125,12 @@
 
         <div class="separator mb-5" v-if="table.length"></div>
 
-        <b-row align-h="end" v-if="table.length">
+        <b-row align-h="end" v-if="table.length && currentUser.status === 'admin'">
           <b-col cols="4" class="text-right">
             <b-list-group>
               <b-list-group-item class="colorTheme d-flex justify-content-between align-items-center h5 font-weight-bold">
                 Total :
-                <b-badge variant="primary">{{new Intl.NumberFormat().format(somme)}} FCFA</b-badge>
+                <b-badge variant="warning">{{new Intl.NumberFormat().format(somme)}} FCFA</b-badge>
               </b-list-group-item>
             </b-list-group>
           </b-col>
@@ -170,12 +170,12 @@ export default {
         end: new Date(
           moment().year(),
           moment().month(),
-          31
+          moment().date()
         ),
         start: new Date(
           moment().year(),
           moment().month(),
-          1
+          moment().date()
         )
       },
       montant: 0,
@@ -183,16 +183,22 @@ export default {
         value: null,
         options: [
           { value: null, text: 'Filtre type' },
-          { value: 'Reservation', text: 'Reservation' },
-          { value: 'Location', text: 'Location' }
+          { value: 'reservation-billet', text: 'Réservation billet' },
+          { value: 'reservation-hotel', text: 'Réservation hôtel' },
+          { value: 'location-voiture', text: 'Location de voiture' },
+          { value: 'transfert-argent', text: "Transfert d'argent" },
+          { value: 'assurance-voyage', text: 'Assurance voyage' }
         ]
       },
       type: {
         value: null,
         options: [
           { value: null, text: 'Choisissez un type' },
-          { value: 'Reservation', text: 'Reservation' },
-          { value: 'Location', text: 'Location' }
+          { value: 'reservation-billet', text: 'Réservation billet' },
+          { value: 'reservation-hotel', text: 'Réservation hôtel' },
+          { value: 'location-voiture', text: 'Location de voiture' },
+          { value: 'transfert-argent', text: "Transfert d'argent" },
+          { value: 'assurance-voyage', text: 'Assurance voyage' }
         ]
       }
     }

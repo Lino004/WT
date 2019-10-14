@@ -66,7 +66,7 @@
     -->
 
     <div>
-      <b-img id="img-logo" src="/assets/img/logo-simple2.png" alt="Responsive image"></b-img>
+      <b-img id="img-logo" :src="img" alt="Responsive image"></b-img>
     </div>
 
     <div class="navbar-right">
@@ -231,7 +231,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['changeSideMenuStatus', 'changeSideMenuForMobile']),
+    ...mapMutations(['changeSideMenuStatus', 'changeSideMenuForMobile', 'changeIsDarkActive']),
     ...mapActions(['setLang', 'signOut']),
     search () {
       this.$router.push(`${this.searchPath}?search=${this.searchKeyword}`)
@@ -321,7 +321,11 @@ export default {
       currentUser: 'currentUser',
       menuType: 'getMenuType',
       menuClickCount: 'getMenuClickCount'
-    })
+    }),
+    img () {
+      if (this.isDarkActive) return require('@/assets/img/logo-simple2-white.png')
+      return require('@/assets/img/logo-simple2.png')
+    }
   },
   beforeDestroy () {
     document.removeEventListener('click', this.handleDocumentforMobileSearch)
@@ -329,6 +333,7 @@ export default {
   created () {
     const color = this.getThemeColor()
     this.isDarkActive = color.indexOf('dark') > -1
+    this.changeIsDarkActive(this.isDarkActive)
   },
   watch: {
     '$i18n.locale' (to, from) {
@@ -347,6 +352,7 @@ export default {
         color = color.replace('dark', 'light')
       }
       if (isChange) {
+        this.changeIsDarkActive(val)
         localStorage.setItem('themeColor', color)
         setTimeout(() => {
           window.location.reload()

@@ -35,12 +35,14 @@
           </b-colxx>
 
           <b-colxx sm="6" v-if="!idClient">
-            <b-form-group label="Adresse">
+            <b-form-group label="Telephone">
               <b-form-input
+                type="number"
+                no-wheel
                 v-model.trim="adresse.value"
                 :state="adresse.state"
                 aria-describedby="msg-err-adresse"
-                placeholder="Adresse du client"
+                placeholder="Telephone du client"
                 @blur="validAdresse"/>
               <b-form-invalid-feedback id="msg-err-adresse">
                 Entrez une valeur valide
@@ -79,8 +81,40 @@
                 plain/>
             </b-form-group>
           </b-colxx>
+          <b-colxx sm="12" v-if="!idClient">
+            <b-form-group label="Numéros de fidélité"
+              description="Appuyer sur entrer pour valider">
+              <input-tag v-model="numeroFidelite" placeholder="Entrez le(s) numéro(s)"></input-tag>
+            </b-form-group>
+          </b-colxx>
 
-          <b-colxx sm="6">
+          <b-col cols="4">
+            <b-form-group label="PNR">
+              <b-form-input
+                v-model.trim="pnr.value"
+                :state="pnr.state"
+                aria-describedby="msg-err-pnr"
+                placeholder="PNR du billet"
+                @blur="validPnr"/>
+              <b-form-invalid-feedback id="msg-err-pnr">
+                Entrez une valeur valide
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4">
+            <b-form-group label="Numero du billet">
+              <b-form-input
+                v-model.trim="numeroBillet.value"
+                :state="numeroBillet.state"
+                aria-describedby="msg-err-numeroBillet"
+                placeholder="Numero du billet"
+                @blur="validNumeroBillet"/>
+              <b-form-invalid-feedback id="msg-err-numeroBillet">
+                Entrez une valeur valide
+              </b-form-invalid-feedback>
+            </b-form-group>
+          </b-col>
+          <b-col cols="4">
             <b-form-group label="Type de passager">
               <b-form-select
                 v-model="type.value"
@@ -88,18 +122,18 @@
                 :state="type.state"
                 plain/>
             </b-form-group>
-          </b-colxx>
-          <b-colxx sm="6">
+          </b-col>
+
+          <b-col :cols="aller.value === 'AS' ? 4 : 3">
             <b-form-group label="Type de billet">
               <b-form-select
-                v-model="aller.value"
+                v-model.lazy="aller.value"
                 :options="aller.options"
                 :state="aller.state"
                 plain/>
             </b-form-group>
-          </b-colxx>
-
-          <b-col :cols="aller.value === 'AS' ? 6 : 4">
+          </b-col>
+          <b-col :cols="aller.value === 'AS' ? 4 : 3">
             <b-form-group label="Trajet">
               <vue-bootstrap-typeahead
                 v-model.trim="trajet"
@@ -109,8 +143,8 @@
               />
             </b-form-group>
           </b-col>
-          <b-col :cols="aller.value === 'AS' ? 6 : 4">
-            <b-form-group label="Date de depart">
+          <b-col :cols="aller.value === 'AS' ? 4 : 3">
+            <b-form-group label="Date aller">
               <v-date-picker
                 mode="single"
                 v-model="dateDepart"
@@ -121,8 +155,8 @@
               />
             </b-form-group>
           </b-col>
-          <b-col cols="4" v-if="aller.value !== 'AS'">
-            <b-form-group label="Date d'arrive">
+          <b-col cols="3" v-if="aller.value !== 'AS'">
+            <b-form-group label="Date retour">
               <v-date-picker
                 mode="single"
                 v-model="dateArrive"
@@ -134,7 +168,7 @@
             </b-form-group>
           </b-col>
 
-          <b-col :cols="currentUser.status === 'admin' ? 3 : 4">
+          <b-col cols="3">
             <b-form-group label="Tarif">
               <b-form-input
                 type="number"
@@ -149,7 +183,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col :cols="currentUser.status === 'admin' ? 3 : 4">
+          <b-col cols="3">
             <b-form-group label="Commission">
               <b-form-input
                 type="number"
@@ -163,7 +197,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col :cols="currentUser.status === 'admin' ? 3 : 4">
+          <b-col cols="3">
             <b-form-group label="Reste">
               <b-form-input
                 type="number"
@@ -177,7 +211,7 @@
               </b-form-invalid-feedback>
             </b-form-group>
           </b-col>
-          <b-col cols="3" v-if="currentUser.status === 'admin'">
+          <b-col cols="3">
             <b-form-group label="FS">
               <b-form-input
                 type="number"
@@ -201,6 +235,7 @@ import firebase from 'firebase/app'
 import 'firebase/database'
 import moment from 'moment'
 import VueBootstrapTypeahead from 'vue-bootstrap-typeahead'
+import InputTag from '@/components/Form/InputTag'
 import { mapGetters } from 'vuex'
 import { baseRef } from '@/constants/config'
 
@@ -210,13 +245,23 @@ export default {
   name: 'ModifBillet',
   props: ['data'],
   components: {
-    VueBootstrapTypeahead
+    VueBootstrapTypeahead,
+    InputTag
   },
   data: () => ({
     nom: '',
     prenom: '',
     nationalite: '',
     adresse: {
+      value: '',
+      state: null
+    },
+    numeroFidelite: [],
+    pnr: {
+      value: '',
+      state: null
+    },
+    numeroBillet: {
       value: '',
       state: null
     },
@@ -294,6 +339,22 @@ export default {
       this.adresse.state = false
       return false
     },
+    validPnr () {
+      if (this.pnr.value.length === 6) {
+        this.pnr.state = null
+        return true
+      }
+      this.pnr.state = false
+      return false
+    },
+    validNumeroBillet () {
+      if (this.numeroBillet.value) {
+        this.numeroBillet.state = null
+        return true
+      }
+      this.numeroBillet.state = false
+      return false
+    },
     validType () {
       if (this.type.value) {
         this.type.state = null
@@ -340,7 +401,9 @@ export default {
       const c = this.validCommission()
       const d = this.validReste()
       const e = this.validTarif()
-      return this.nom && this.prenom && this.trajet && a && b && c && d && e
+      const f = this.validPnr()
+      const g = this.validNumeroBillet()
+      return this.nom && this.prenom && this.trajet && a && b && c && d && e && f && g
     },
     valideClient () {
       return this.nom && this.prenom && this.validAdresse() && this.nationalite && this.sexe.value
@@ -356,6 +419,7 @@ export default {
         dateDeNaissance: moment(this.dateDeNaissance).format('ll'),
         sexe: this.sexe.value,
         status: 'actif',
+        numeroFidelite: this.numeroFidelite,
         date: moment().format('lll')
       })
       return id
@@ -365,6 +429,8 @@ export default {
         nom: this.nom.toUpperCase(),
         prenom: this.prenom.toUpperCase(),
         idClient: clientId,
+        pnr: this.pnr.value,
+        numeroBillet: this.numeroBillet.value,
         type: this.type.value,
         aller: this.aller.value,
         trajet: this.trajet.toUpperCase(),
@@ -412,6 +478,8 @@ export default {
       this.trajet = this.data.trajet
       this.tarif.value = this.data.tarif
       this.fs = this.data.fs
+      this.pnr.value = this.data.pnr
+      this.numeroBillet.value = this.data.numeroBillet
       this.commission.value = this.data.commission
       this.idBillet = this.data.id
       this.dateDepart = new Date(

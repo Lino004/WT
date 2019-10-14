@@ -28,8 +28,7 @@
               <a><i class="simple-icon-people"></i>  {{ $t("menu.gestion-client") }}</a>
             </router-link>
           </li>
-          <li :class="{ active : selectedParentMenu==='gestion-autre'}"
-            v-if="currentUser.status === 'admin'">
+          <li :class="{ active : selectedParentMenu==='gestion-autre'}">
             <router-link
               :class="{ active : selectedParentMenu==='gestion-autre' }"
               @click.native="changeSelectedParentHasNoSubmenu('gestion-autre')"

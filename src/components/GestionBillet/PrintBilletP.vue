@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="d-none">
-      <b-row id="print-billet" class="invoice-vue">
+      <b-row id="print-billet-p" class="invoice-vue">
         <b-colxx xxs="12" class="mb-5">
           <b-card class="mb-5 invoice-contents" no-body>
             <b-card-body class="d-flex flex-column justify-content-between">
@@ -26,7 +26,7 @@
                 <div class="d-flex flex-row justify-content-between mb-5">
                     <div class="d-flex flex-column w-70 mr-2 p-4 text-semi-muted bg-semi-muted">
                         <p class="mb-0">Periode: du {{startPeriode}} au {{endPeriode}} </p>
-                        <p class="mb-0">Nombre de billet vendu: {{items.length}} </p>
+                        <p class="mb-0">Nombre de billet vendu: {{tempTable.length}} </p>
                     </div>
                     <!-- <div class="d-flex w-30 flex-column text-right p-4 text-semi-muted bg-semi-muted">
                         <p class="mb-0">Invoice #: 741</p>
@@ -34,7 +34,7 @@
                     </div> -->
                 </div>
 
-                <b-table striped :items="items" :fields="fields"></b-table>
+                <b-table striped :items="tempTable" :fields="fields"></b-table>
 
               </div>
 
@@ -68,7 +68,27 @@
         </b-colxx>
       </b-row>
     </div>
-    <a class="text-success cursor" @click="printBillet"><i class="iconsminds-printer h1"></i></a>
+    <a class="text-danger cursor" @click="$bvModal.show('modal-print-%')"><i class="iconsminds-printer h1"></i></a>
+    <b-modal
+      id="modal-print-%"
+      centered
+      ok-title="Imprimer"
+      cancel-title="Annuler"
+      cancel-variant="danger"
+      @ok="calc"
+      hide-header>
+      <b-form>
+        <b-form-group
+          label="Entrez le pourcentage a appliquer"
+        >
+          <b-form-input
+            v-model="pourcent"
+            type="number"
+            max="100"
+          ></b-form-input>
+        </b-form-group>
+      </b-form>
+    </b-modal>
   </div>
 </template>
 
@@ -81,10 +101,7 @@ export default {
   name: 'PrintBillet',
   props: [
     'table',
-    'periode',
-    'sommeTarif',
-    'sommeCommi',
-    'sommeReste'
+    'periode'
   ],
   data: () => ({
     fields: [
@@ -97,25 +114,55 @@ export default {
       { key: 'tarif', label: 'Tarif', sortable: true },
       { key: 'commission', label: 'Commi.', sortable: true },
       { key: 'reste', label: 'Reste', sortable: true }
-    ]
+    ],
+    pourcent: 50,
+    tempTable: []
   }),
   computed: {
-    items () {
-      return this.table
-    },
     startPeriode () {
       return moment(this.periode.start).format('ll')
     },
     endPeriode () {
       return moment(this.periode.end).format('ll')
+    },
+    sommeTarif () {
+      let somme = 0
+      this.tempTable.forEach(el => {
+        somme = somme + parseInt(el.tarif, 10)
+      })
+      return somme
+    },
+    sommeCommi () {
+      let somme = 0
+      this.tempTable.forEach(el => {
+        somme = somme + parseInt(el.commission, 10)
+      })
+      return somme
+    },
+    sommeReste () {
+      let somme = 0
+      this.tempTable.forEach(el => {
+        somme = somme + parseInt(el.reste, 10)
+      })
+      return somme
     }
   },
   methods: {
     printBillet () {
-      this.$htmlToPaper('print-billet')
+      console.log(this.tempTable)
+      this.$htmlToPaper('print-billet-p')
     },
     getLogo () {
       return require('@/assets/img/logo-simple2.png')
+    },
+    calc () {
+      this.tempTable = this.table.slice()
+      this.tempTable.forEach(el => {
+        el.commission = (el.commission * this.pourcent) / 100
+        el.reste = el.tarif - el.commission
+      })
+      console.log(this.tempTable)
+      this.printBillet()
     }
   }
 }

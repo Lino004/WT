@@ -8,7 +8,7 @@
   </b-row>
   <b-row>
     <b-colxx xxs="12">
-      <b-card class="mb-4">
+      <b-card class="mb-4 radius-20">
         <b-card-title class="mb-1">
           <div class="d-flex">
             <div class="p-2 align-self-center flex-grow-1">
@@ -29,8 +29,15 @@
                 <b-colxx>
                   <b-form-group>
                     <b-form-input
-                      v-model.trim="nom"
+                      v-model.trim="numero"
                       placeholder="Filtre sur le nom"/>
+                  </b-form-group>
+                </b-colxx>
+                <b-colxx>
+                  <b-form-group>
+                    <b-form-input
+                      v-model.trim="nom"
+                      placeholder="Filtre sur numero"/>
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
@@ -38,6 +45,13 @@
                     <b-form-input
                       v-model.trim="prenom"
                       placeholder="Filtre sur le prenom"/>
+                  </b-form-group>
+                </b-colxx>
+                <b-colxx>
+                  <b-form-group>
+                    <b-form-input
+                      v-model.trim="pnr"
+                      placeholder="Filtre sur pnr"/>
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
@@ -75,6 +89,15 @@
                 </b-colxx>
               </b-row>
             </div>
+            <!-- <div class="p-2">
+              <PrintBilletP
+                v-if="table.length"
+                :table="tempDataPeriode"
+                :periode="periode"
+                :sommeTarif="sommeTarif"
+                :sommeCommi="sommeCommi"
+                :sommeReste="sommeReste"/>
+            </div> -->
             <div class="p-2">
               <PrintBillet
                 v-if="table.length"
@@ -83,7 +106,7 @@
                 :sommeTarif="sommeTarif"
                 :sommeCommi="sommeCommi"
                 :sommeReste="sommeReste"/>
-              </div>
+            </div>
             <div class="p-2"> <AddBillet/> </div>
           </div>
         </b-card-title>
@@ -92,13 +115,26 @@
 
         <b-table
           hover
+          :responsive="true"
           :items="table"
           :fields="fields"
           :current-page="currentPage"
           :per-page="perPage"
-          :busy="loading">
+          :busy="loading"
+          selectable
+          select-mode="single"
+          @row-selected="onRowSelected">
+          <template v-slot:cell(date)="data">
+            <div> {{formatDateLLL(data.value)}} </div>
+          </template>
           <template v-slot:cell(type)="data">
             <div class="text-capitalize"> {{data.value}} </div>
+          </template>
+          <template v-slot:cell(dateDepart)="data">
+            <div> {{formatDateLL(data.value)}} </div>
+          </template>
+          <template v-slot:cell(dateArrive)="data">
+            <div> {{formatDateLL(data.value)}} </div>
           </template>
           <template v-slot:cell(tarif)="data">
             <h6><b-badge variant="primary"> {{new Intl.NumberFormat().format(data.value)}} </b-badge></h6>
@@ -110,7 +146,7 @@
             <h6><b-badge variant="success"> {{new Intl.NumberFormat().format(data.value)}} </b-badge></h6>
           </template>
           <template v-slot:cell(fs)="data">
-            <h6><b-badge variant="dark"> {{new Intl.NumberFormat().format(data.value)}} </b-badge></h6>
+            <h6><b-badge variant="warning"> {{new Intl.NumberFormat().format(data.value)}} </b-badge></h6>
           </template>
           <template v-slot:cell(status)="data">
             <h6><b-badge variant="light"> {{data.value}} </b-badge></h6>
@@ -118,18 +154,18 @@
           <template v-slot:cell(actions)="data">
             <span
               class="h6 text-danger cursor"
-              @click="selectBillet(data.item, 'modal-delete-billet')"
+              @click.stop="selectBillet(data.item, 'modal-delete-billet')"
               v-if="currentUser.status === 'admin'">
               <i class="simple-icon-trash"></i>
             </span>
             <span
               class="h6 text-secondary cursor"
-              @click="selectBillet(data.item, 'modal-annule-billet')">
+              @click.stop="selectBillet(data.item, 'modal-annule-billet')">
               <i class="iconsminds-close"></i>
             </span>
             <span
               class="h6 text-primary cursor"
-              @click="selectBillet(data.item, 'modal-modif-billet')">
+              @click.stop="selectBillet(data.item, 'modal-modif-billet')">
               <i class="simple-icon-note"></i>
             </span>
           </template>
@@ -166,25 +202,36 @@
         <div class="separator mb-5" v-if="table.length"></div>
 
         <b-row align-h="end" v-if="table.length">
-          <b-col cols="4" class="text-right">
+          <b-col>
             <b-list-group>
               <b-list-group-item class="colorTheme d-flex justify-content-between align-items-center h5 font-weight-bold">
                 Total Tarif :
                 <b-badge variant="primary">{{new Intl.NumberFormat().format(sommeTarif)}} FCFA</b-badge>
               </b-list-group-item>
+            </b-list-group>
+          </b-col>
+          <b-col>
+            <b-list-group>
               <b-list-group-item class="colorTheme d-flex justify-content-between align-items-center h5 font-weight-bold">
-                Total Commission :
-                <b-badge variant="light">{{new Intl.NumberFormat().format(sommeCommi)}} FCFA</b-badge>
+                Total Commi. :
+                <b-badge variant="secondary">{{new Intl.NumberFormat().format(sommeCommi)}} FCFA</b-badge>
               </b-list-group-item>
+            </b-list-group>
+          </b-col>
+          <b-col>
+            <b-list-group>
               <b-list-group-item class="colorTheme d-flex justify-content-between align-items-center h5 font-weight-bold">
                 Total Reste :
                 <b-badge variant="success">{{new Intl.NumberFormat().format(sommeReste)}} FCFA</b-badge>
               </b-list-group-item>
+            </b-list-group>
+          </b-col>
+          <b-col v-if="currentUser.status === 'admin'">
+            <b-list-group>
               <b-list-group-item
-                v-if="currentUser.status === 'admin'"
                 class="colorTheme d-flex justify-content-between align-items-center h5 font-weight-bold">
                 Total FS :
-                <b-badge variant="dark">{{new Intl.NumberFormat().format(sommeFs)}} FCFA</b-badge>
+                <b-badge variant="warning">{{new Intl.NumberFormat().format(sommeFs)}} FCFA</b-badge>
               </b-list-group-item>
             </b-list-group>
           </b-col>
@@ -193,6 +240,7 @@
         <DeleteBillet :id="billetSelect.id"/>
         <AnnuleBillet :id="billetSelect.id"/>
         <ModifBillet :data="billetSelect"/>
+        <DetailsBillet :data="billetSelect"/>
 
       </b-card>
     </b-colxx>
@@ -206,7 +254,9 @@ import AddBillet from '@/components/GestionBillet/AddBillet.vue'
 import DeleteBillet from '@/components/GestionBillet/DeleteBillet.vue'
 import AnnuleBillet from '@/components/GestionBillet/AnnuleBillet.vue'
 import ModifBillet from '@/components/GestionBillet/ModifBillet.vue'
+import DetailsBillet from '@/components/GestionBillet/DetailsBillet.vue'
 import PrintBillet from '@/components/GestionBillet/PrintBillet.vue'
+// import PrintBilletP from '@/components/GestionBillet/PrintBilletP.vue'
 import { mapGetters } from 'vuex'
 
 moment.locale('fr')
@@ -217,7 +267,9 @@ export default {
     DeleteBillet,
     AnnuleBillet,
     ModifBillet,
-    PrintBillet
+    DetailsBillet,
+    PrintBillet/* ,
+    PrintBilletP */
   },
   data () {
     return {
@@ -236,8 +288,10 @@ export default {
           moment().date()
         )
       },
+      numero: '',
       nom: '',
       prenom: '',
+      pnr: '',
       trajet: '',
       depart: null,
       arrive: null
@@ -254,13 +308,13 @@ export default {
         return [
           { key: 'index', label: 'N°', sortable: true },
           { key: 'date', label: 'Date', sortable: true },
+          { key: 'numeroBillet', label: 'Numero', sortable: true },
           { key: 'nom', label: 'Nom', sortable: true },
           { key: 'prenom', label: 'Prenom', sortable: true },
-          { key: 'type', label: 'Passager', sortable: true },
-          { key: 'aller', label: 'Billet', sortable: true },
+          { key: 'pnr', label: 'PNR', sortable: true },
           { key: 'trajet', label: 'Trajet', sortable: true },
-          { key: 'dateDepart', label: 'Date depart', sortable: true },
-          { key: 'dateArrive', label: 'Date arrive', sortable: true },
+          { key: 'dateDepart', label: 'Date aller', sortable: true },
+          { key: 'dateArrive', label: 'Date retour', sortable: true },
           { key: 'tarif', label: 'Tarif', sortable: true },
           { key: 'commission', label: 'Commi.', sortable: true },
           { key: 'reste', label: 'Reste', sortable: true },
@@ -272,13 +326,13 @@ export default {
       return [
         { key: 'index', label: 'N°', sortable: true },
         { key: 'date', label: 'Date', sortable: true },
+        { key: 'numeroBillet', label: 'Numero', sortable: true },
         { key: 'nom', label: 'Nom', sortable: true },
         { key: 'prenom', label: 'Prenom', sortable: true },
-        { key: 'type', label: 'Passager', sortable: true },
-        { key: 'aller', label: 'Billet', sortable: true },
+        { key: 'pnr', label: 'PNR', sortable: true },
         { key: 'trajet', label: 'Trajet', sortable: true },
-        { key: 'dateDepart', label: 'Date depart', sortable: true },
-        { key: 'dateArrive', label: 'Date arrive', sortable: true },
+        { key: 'dateDepart', label: 'Date aller', sortable: true },
+        { key: 'dateArrive', label: 'Date retour', sortable: true },
         { key: 'tarif', label: 'Tarif', sortable: true },
         { key: 'commission', label: 'Commi.', sortable: true },
         { key: 'reste', label: 'Reste', sortable: true },
@@ -329,11 +383,17 @@ export default {
         data = data.filter(el => moment(this.periode.start).isSameOrBefore(moment(el.date, 'll')) &&
           moment(this.periode.end).isSameOrAfter(moment(el.date, 'll')))
       }
+      if (this.numero) {
+        data = data.filter(el => el.numeroBillet.toLowerCase().includes(this.numero.toLowerCase()))
+      }
       if (this.nom) {
         data = data.filter(el => el.nom.toLowerCase().includes(this.nom.toLowerCase()))
       }
       if (this.prenom) {
         data = data.filter(el => el.prenom.toLowerCase().includes(this.prenom.toLowerCase()))
+      }
+      if (this.pnr) {
+        data = data.filter(el => el.pnr.toLowerCase().includes(this.pnr.toLowerCase()))
       }
       if (this.trajet) {
         data = data.filter(el => el.trajet.toLowerCase().includes(this.trajet.toLowerCase()))
@@ -351,6 +411,17 @@ export default {
     selectBillet (data, refname) {
       this.billetSelect = data
       this.$bvModal.show(refname)
+    },
+    formatDateLL (date) {
+      if (date === '---') return date
+      return moment(date, 'll').format('DD/MM/YY')
+    },
+    formatDateLLL (date) {
+      return moment(date, 'lll').format('DD/MM/YY hh:mm')
+    },
+    onRowSelected (items) {
+      this.billetSelect = items[0]
+      this.$bvModal.show('modal-detail-billet')
     }
   }
 }
