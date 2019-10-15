@@ -271,9 +271,9 @@ export default {
       state: null,
       options: [
         { value: null, text: 'Choisissez un type' },
-        { value: 'adt', text: 'Adt' },
-        { value: 'chd', text: 'Chd' },
-        { value: 'inf', text: 'Inf' }
+        { value: 'adt', text: 'ADT' },
+        { value: 'chd', text: 'CHD' },
+        { value: 'inf', text: 'INF' }
       ]
     },
     sexe: {

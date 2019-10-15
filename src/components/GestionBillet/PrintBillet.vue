@@ -17,7 +17,7 @@
                       Assurance voyage <br>
                       Reservation d'hôtel <br>
                       Location de voiture <br>
-                      Location de salle de conférence
+                      Transfert d'argent
                     </p>
                   </div>
                 </div>
@@ -34,7 +34,14 @@
                     </div> -->
                 </div>
 
-                <b-table striped :items="items" :fields="fields"></b-table>
+                <b-table striped :items="items" :fields="fields">
+                  <template v-slot:cell(date)="data">
+                    <div> {{formatDateLLL(data.value)}} </div>
+                  </template>
+                  <template v-slot:cell(type)="data">
+                    <div> {{data.value.toUpperCase()}} </div>
+                  </template>
+                </b-table>
 
               </div>
 
@@ -75,7 +82,7 @@
 <script>
 import moment from 'moment'
 
-moment.locale()
+moment.locale('fr')
 
 export default {
   name: 'PrintBillet',
@@ -90,9 +97,11 @@ export default {
     fields: [
       { key: 'index', label: 'N°', sortable: true },
       { key: 'date', label: 'Date', sortable: true },
+      { key: 'pnr', label: 'PNR', sortable: true },
       { key: 'nom', label: 'Nom', sortable: true },
       { key: 'prenom', label: 'Prenom', sortable: true },
       { key: 'type', label: 'Passager', sortable: true },
+      { key: 'numeroBillet', label: 'Numero', sortable: true },
       { key: 'trajet', label: 'Trajet', sortable: true },
       { key: 'tarif', label: 'Tarif', sortable: true },
       { key: 'commission', label: 'Commi.', sortable: true },
@@ -116,6 +125,9 @@ export default {
     },
     getLogo () {
       return require('@/assets/img/logo-simple2.png')
+    },
+    formatDateLLL (date) {
+      return moment(date, 'lll').format('DD/MM/YY hh:mm')
     }
   }
 }

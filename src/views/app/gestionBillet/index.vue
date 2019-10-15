@@ -29,15 +29,15 @@
                 <b-colxx>
                   <b-form-group>
                     <b-form-input
-                      v-model.trim="numero"
-                      placeholder="Filtre sur le nom"/>
+                      v-model.trim="nom"
+                      placeholder="Filtre sur numero"/>
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
                   <b-form-group>
                     <b-form-input
-                      v-model.trim="nom"
-                      placeholder="Filtre sur numero"/>
+                      v-model.trim="numero"
+                      placeholder="Filtre sur le nom"/>
                   </b-form-group>
                 </b-colxx>
                 <b-colxx>
@@ -308,10 +308,10 @@ export default {
         return [
           { key: 'index', label: 'N°', sortable: true },
           { key: 'date', label: 'Date', sortable: true },
-          { key: 'numeroBillet', label: 'Numero', sortable: true },
+          { key: 'pnr', label: 'PNR', sortable: true },
           { key: 'nom', label: 'Nom', sortable: true },
           { key: 'prenom', label: 'Prenom', sortable: true },
-          { key: 'pnr', label: 'PNR', sortable: true },
+          { key: 'numeroBillet', label: 'Numero', sortable: true },
           { key: 'trajet', label: 'Trajet', sortable: true },
           { key: 'dateDepart', label: 'Date aller', sortable: true },
           { key: 'dateArrive', label: 'Date retour', sortable: true },
@@ -326,10 +326,10 @@ export default {
       return [
         { key: 'index', label: 'N°', sortable: true },
         { key: 'date', label: 'Date', sortable: true },
-        { key: 'numeroBillet', label: 'Numero', sortable: true },
+        { key: 'pnr', label: 'PNR', sortable: true },
         { key: 'nom', label: 'Nom', sortable: true },
         { key: 'prenom', label: 'Prenom', sortable: true },
-        { key: 'pnr', label: 'PNR', sortable: true },
+        { key: 'numeroBillet', label: 'Numero', sortable: true },
         { key: 'trajet', label: 'Trajet', sortable: true },
         { key: 'dateDepart', label: 'Date aller', sortable: true },
         { key: 'dateArrive', label: 'Date retour', sortable: true },
