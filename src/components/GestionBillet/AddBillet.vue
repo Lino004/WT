@@ -245,7 +245,7 @@ const y = date.getFullYear()
 const m = date.getMonth()
 const lastDay = new Date(y, m + 1, 0)
 
-moment.locale('fr')
+moment.locale()
 
 export default {
   name: 'AddBillet',

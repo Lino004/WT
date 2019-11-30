@@ -187,7 +187,8 @@ export default {
           { value: 'reservation-hotel', text: 'Réservation hôtel' },
           { value: 'location-voiture', text: 'Location de voiture' },
           { value: 'transfert-argent', text: "Transfert d'argent" },
-          { value: 'assurance-voyage', text: 'Assurance voyage' }
+          { value: 'assurance-voyage', text: 'Assurance voyage' },
+          { value: 'carte-uba', text: 'Carte UBA' }
         ]
       },
       type: {
@@ -198,7 +199,8 @@ export default {
           { value: 'reservation-hotel', text: 'Réservation hôtel' },
           { value: 'location-voiture', text: 'Location de voiture' },
           { value: 'transfert-argent', text: "Transfert d'argent" },
-          { value: 'assurance-voyage', text: 'Assurance voyage' }
+          { value: 'assurance-voyage', text: 'Assurance voyage' },
+          { value: 'carte-uba', text: 'Carte UBA' }
         ]
       }
     }
